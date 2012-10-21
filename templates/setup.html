@@ -1,0 +1,27 @@
+{%extends "base.html"%}
+{%block body%}
+
+<h1>First-time setup</h1>
+
+Welcome to CLOT!  This setup should only be completed by the site administrator.  Make sure to complete this before giving the URL to your website to the public.
+<br />
+
+<ul>
+    <li>For Name below, provide the name you wish to give to this website (not your name).</li>
+    <li>You must be a member to set up a CLOT site.  The form below asks for your WarLight e-mail address and API Token (AdminEmail, AdminAPIToken).  You can get your API token by visiting <a href="http://warlight.net/API/GetAPIToken">http://warlight.net/API/GetAPIToken</a>
+    <br />Your e-mail address and API Token are never revealed to visitors of this website.  However, they are stored in your database, so you should take care not to give database access to anyone.  If you ever suspect someone else has learned your API Token, you should change your WarLight account password immediately as this re-randomizes your API Token.</li>
+    <li>The base CLOT code assumes that all games will be created with the same template.  Provide this template ID below.  You can make your own template on WarLight.net and then get its ID by looking at the URL provided after creating it.  If you want a tournament/ladder where each game has different settings, you must modify the CLOT code.</li>
+</ul>
+
+<form action="{%url main.setup%}" method="post">
+    <table>
+        {{form}}
+        <tr>
+            <td>
+                <input type="submit" value="Submit">
+            </td>
+        </tr>
+    </table>
+</form>
+
+{%endblock%}

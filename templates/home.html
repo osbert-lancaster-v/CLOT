@@ -1,0 +1,43 @@
+{%extends "base.html"%}
+{%block body%}
+
+<h1>{{config.name|escape}}</h1>
+
+<h2>Ranked Players</h2>
+<table border="1" cellspacing="0">
+    <thead>
+        <tr>
+            <td>Rank</td>
+            <td>Player</td>
+        </tr>
+    </thead>
+    {%for player in rankedplayers%}
+    <tr>
+        
+        <td>{{player.currentrank}}</td>
+        <td><a href="{%url players.player player.key.id%}">{{player.name|escape}}</a></td>
+    </tr>
+    {%endfor%}
+</table>
+
+<h2>Non-ranked players</h2>
+
+<table border="1" cellspacing="0">
+    <thead>
+        <tr>
+            <td>Player</td>
+        </tr>
+    </thead>
+    {%for player in nonrankedplayers%}
+    <tr>
+        
+        <td><a href="{%url players.player player.key.id%}">{{player.name|escape}}</a></td>
+    </tr>
+    {%endfor%}
+</table>
+
+
+
+<br /><a href="{%url players.new %}">Join!</a>
+
+{%endblock%}
