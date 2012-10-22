@@ -66,8 +66,7 @@ def hitapiwithauth(api, params, email, apitoken):
   prms = { 'Email': email,'APIToken': apitoken }
   prms.update(params)
 
-  #wlnet = 'warlight.net'
-  wlnet = '192.168.1.105:81'
+  wlnet = 'warlight.net'
   
   conn = httplib.HTTPConnection(wlnet, 80)
   conn.connect()
