@@ -16,9 +16,10 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns(
-    '',
-    (r'^$', 'home.index'),
-    (r'^join$', 'players.new'),
-    (r'^editplayer/(\d+)$', 'players.edit'),
+	'',
+	(r'^$', 'home.index'),
+	(r'^join$', 'players.new'),
+	(r'^editplayer/(\d+)$', 'players.edit'),
 	(r'^setup$', 'main.setup'),
-    )
+	(r'^test$', 'test.test'),
+	)
