@@ -17,7 +17,7 @@ class ClotConfig(db.Model):
 	name = db.StringProperty(required=True, verbose_name="Name of your tournament or ladder")
 	adminEmail = db.StringProperty(required=True, verbose_name="Your WarLight.net e-mail address")
 	adminApiToken = db.StringProperty(required=True, verbose_name="API token (see above for how to get this)")
-	membersOnly = db.BooleanProperty(required=True, verbose_name="Only allow WarLight members to join")
+	membersOnly = db.BooleanProperty(verbose_name="Only allow WarLight members to join")
 
 
 class ClotConfigForm(djangoforms.ModelForm):
@@ -39,21 +39,15 @@ def setup(request):
 
 	errors = form.errors
 	if not errors:
-		try:
-			config = form.save(commit=False)
+		config = form.save(commit=False)
 
-			#Verify the email/apitoken work
-			verify = hitapiwithauth('/API/ValidateAPIToken', {}, config.adminEmail, config.adminApiToken)
-			if not "apiTokenIsValid" in verify:
-					errors['__all__'] = 'Email/APIToken were not valid. Response = ' + verify
+		#Verify the email/apitoken work
+		verify = hitapiwithauth('/API/ValidateAPIToken', {}, config.adminEmail, config.adminApiToken)
+		if not "apiTokenIsValid" in verify:
+				errors['adminApiToken'] = 'The provided email or API Token were not valid.'
 					
-		except ValueError, err:
-			errors['__all__'] = unicode(err)
 	if errors:
 		return shortcuts.render_to_response('setup.html', {'form': form})
-
-	
-		
 
 	config.put()
 
