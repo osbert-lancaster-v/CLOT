@@ -3,41 +3,40 @@
 
 <h1>{{config.name|escape}}</h1>
 
-<h2>Ranked Players</h2>
-<table border="1" cellspacing="0">
+<h2>Players</h2>
+<table border="1">
     <thead>
         <tr>
             <td>Rank</td>
             <td>Player</td>
         </tr>
     </thead>
-    {%for player in rankedplayers%}
+    {%for player in players%}
     <tr>
         
-        <td>{{player.currentrank}}</td>
-        <td><a href="{%url players.player player.key.id%}">{{player.name|escape}}</a></td>
+        <td>{{player.currentRank}}</td>
+        <td><a href="player/{{player.key.id}}">{{player.name|escape}}</a></td>
     </tr>
     {%endfor%}
 </table>
 
-<h2>Non-ranked players</h2>
+<h2>Games</h2>
 
-<table border="1" cellspacing="0">
+<table border="1">
     <thead>
         <tr>
-            <td>Player</td>
+            <td>Game</td>
         </tr>
     </thead>
-    {%for player in nonrankedplayers%}
+    {%for game in games%}
+    
     <tr>
-        
-        <td><a href="{%url players.player player.key.id%}">{{player.name|escape}}</a></td>
+        <td><a href="http://warlight.net/MultiPlayer?GameID={{ game.wlnetGameID}}">{{game.name}}</a></td>
     </tr>
+
     {%endfor%}
 </table>
 
-
-
-<br /><a href="{%url players.new %}">Join!</a>
+<br /><a href="/join">Join</a> | <a href="/leave">Leave</a>
 
 {%endblock%}

@@ -4,19 +4,20 @@ from google.appengine.ext import db
 from google.appengine.ext.db import djangoforms
 
 import django
-from django import http
-from django import shortcuts
 import httplib
 import urllib
-from games import *
+
+from itertools import groupby
+
+from django import http
+from django import shortcuts
 
 
 class ClotConfig(db.Model):
-	name = db.StringProperty(required=True)
-	adminEmail = db.StringProperty(required=True)
-	adminApiToken = db.StringProperty(required=True)
-	templateID = db.IntegerProperty(required=True)
-	membersOnly = db.BooleanProperty(required=True)
+	name = db.StringProperty(required=True, verbose_name="Name of your tournament or ladder")
+	adminEmail = db.StringProperty(required=True, verbose_name="Your WarLight.net e-mail address")
+	adminApiToken = db.StringProperty(required=True, verbose_name="API token (see above for how to get this)")
+	membersOnly = db.BooleanProperty(required=True, verbose_name="Only allow WarLight members to join")
 
 
 class ClotConfigForm(djangoforms.ModelForm):
@@ -59,7 +60,6 @@ def setup(request):
 	return http.HttpResponseRedirect('/')
 
 wlnet = 'warlight.net'
-#wlnet = '192.168.1.105:81'
 	
 
 def hitapi(api, params):
@@ -67,7 +67,7 @@ def hitapi(api, params):
 	return hitapiwithauth(api, params, config.adminEmail, config.adminApiToken)
 	
 def hitapiwithauth(api, params, email, apitoken):
-	prms = { 'Email': email,'APIToken': apitoken }
+	prms = { 'Email': email, 'APIToken': apitoken }
 	prms.update(params)
 
 	
@@ -92,4 +92,11 @@ def postToApi(api, postData):
 	ret = resp.read()
 
 	conn.close()
+	return ret
+
+def group(collection, keyfunc):
+	data = sorted(collection, key=keyfunc)
+	ret = {}
+	for k,g in groupby(data, keyfunc):
+		ret[k] = list(g)
 	return ret

@@ -18,8 +18,10 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns(
 	'',
 	(r'^$', 'home.index'),
-	(r'^join$', 'players.new'),
-	(r'^editplayer/(\d+)$', 'players.edit'),
+	(r'^join$', 'join.go'),
+	(r'^leave$', 'leave.go'),
+	(r'^player/(\d+)$', 'viewplayer.go'),
 	(r'^setup$', 'main.setup'),
 	(r'^test$', 'test.test'),
+	(r'^cron$', 'cron.go')
 	)
