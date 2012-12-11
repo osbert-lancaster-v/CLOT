@@ -1,0 +1,36 @@
+{%extends "base.html"%}
+{%block body%}
+
+<a href="/">&lt;&lt; Back</a>
+<h1>Leave</h1>
+
+
+Leaving will cause you to stop getting new games.  This won't cause the games you're in to disappear, this will just stop new games from being created.<br /><br />
+To leave, you must provide your <b>invite token</b>.  To get your invite token, visit <a href="http://warlight.net/InviteToken">http://warlight.net/InviteToken</a>, and then copy/paste it from that page to this one.<br /><br />
+
+<form action="/leave" method="post">
+    <table cellspacing="9">
+        {% for field in form %}
+        <tr>
+            <td>
+                {{ field.label_tag }}:
+            </td>
+            <td>
+                {{ field }}
+            </td>
+            <td style="color: red">
+                {{ field.errors }}
+            </td>
+
+        </tr>    
+        {% endfor %}
+
+        <tr>
+            <td colspan="2" style="text-align: center">
+                <input type="submit" value="Leave">
+            </td>
+        </tr>
+    </table>
+</form>
+
+{%endblock%}

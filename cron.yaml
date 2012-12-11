@@ -1,0 +1,8 @@
+﻿cron:
+- url: /cron
+  schedule: every 6 hours   #You can control here how often your website will check for updates to games.
+                            #The default is 6 hours. You can adjust it, but do NOT set this to a value 
+							#lower than 3 hours. Setting this lower than 3 hours puts strain on the 
+							#WarLight.net website, since it has to call the API to get the status of 
+							#every active game in your CLOT every time it runs.  Calling the APIs too often
+							#will get you in trouble.
