@@ -7,13 +7,14 @@ import django
 from django import http
 from django import shortcuts
 from clot import *
+from django.utils import simplejson as json
 import httplib
 import urllib
 import random
 import logging
 
 def test(request):
-	setRanks()
+
 	return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
 
 

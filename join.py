@@ -4,7 +4,7 @@ from google.appengine.ext import db
 from google.appengine.ext.db import djangoforms
 
 import django
-import json
+from django.utils import simplejson as json
 import logging
 
 from django import http

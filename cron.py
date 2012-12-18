@@ -6,7 +6,7 @@ from google.appengine.ext.db import djangoforms
 import django
 import datetime
 from django import shortcuts
-import json
+from django.utils import simplejson as json
 import logging
 
 from clot import createGames
