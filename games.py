@@ -37,7 +37,7 @@ class GamePlayer(db.Model):
 
 def createGame(players, templateID):
 	"""This calls the WarLight.net API to create a game, and then creates the Game and GamePlayer rows in the local DB"""
-	gameName = ' vs '.join([p.name for p in players])
+	gameName = ' vs '.join([p.name for p in players])[:50]
 
 	config = getClotConfig()
 	apiRetStr = postToApi('/API/CreateGame', json.dumps( { 
