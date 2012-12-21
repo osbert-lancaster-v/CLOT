@@ -30,6 +30,18 @@
 </table>
 
 
+<h2>HeadToHeadRecord</h2>
+<table border="1">
+    {%for p in biggermat%}
+    <tr>
+        {%for o in p%}
+            <td>{{o}}</td>
+        {%endfor%}
+    </tr>
+    {%endfor%}
+</table>
+
+
 <h2>Games</h2>
 <table border="1">
     <thead>
@@ -51,18 +63,6 @@
     {%endfor%}
 </table>
 
-
-
-<h2>HeadToHeadRecord</h2>
-<table border="1">
-    {%for p in biggermat%}
-    <tr>
-        {%for o in p%}
-            <td>{{o}}</td>
-        {%endfor%}
-    </tr>
-    {%endfor%}
-</table>
 
 
 

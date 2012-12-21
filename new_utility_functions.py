@@ -16,8 +16,7 @@ from main import getClotConfig
 
 from copy import deepcopy
 
-from clot import getFinishedGames
-from clot import getPlayersIDNameDict
+import clot
 
 
 ###########################################
@@ -25,12 +24,12 @@ from clot import getPlayersIDNameDict
 def getHeadToHeadTable():
 
 	#Load all finished games
-	finishedGames = getFinishedGames()
+	finishedGames = clot.getFinishedGames()
 	logging.info("finishedGames:")
 	logging.info(finishedGames)
 
 	#get player_id : name   dict
-	players_id_name_dict = getPlayersIDNameDict()
+	players_id_name_dict = clot.getPlayersIDNameDict()
 	logging.info('players_id_name_dict')
 	logging.info(players_id_name_dict)
 
@@ -60,7 +59,7 @@ def getHeadToHeadTable():
 	#biggermat [x][y] for x,y>0 is the number of games player x won against player y.  
 	#biggermat [0][y] for y>0 is the player_id of player y.
 	#biggermat [x][0] for x>0 is the player_id of player x.
-	return biggermat
+	return biggermat, head_to_head_2d
 
 
 def catcrp(x,y):

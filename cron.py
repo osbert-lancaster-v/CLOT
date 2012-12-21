@@ -9,8 +9,7 @@ from django import shortcuts
 from django.utils import simplejson as json
 import logging
 
-from clot import createGames
-from clot import setRanks
+import clot
 from games import Game
 from main import hitapi
 from players import Player
@@ -19,8 +18,12 @@ def go(request):
 	logging.info("Starting cron...")
 	checkInProgressGames()
 	setResultsOfAllFinishedGames()
-	createGames()
-	setRanks()
+
+	#clot.createGames()
+	#clot.createGames_RandomMatchup()
+	clot.createGames_Swiss()
+
+	clot.setRanks()
 	logging.info("Cron done")
 	return shortcuts.render_to_response('cron.html')
 
@@ -89,3 +92,4 @@ def findLoser(data):
 	API.  We just look for a player with the "won" state and then retrieve their Player instance from the database"""
 	loserInviteToken = filter(lambda p: p['state'] != 'Won', data['players'])[0]["id"]
 	return Player.all().filter('inviteToken =', loserInviteToken)[0]
+

@@ -52,7 +52,7 @@ def index(request):
 
 
 	#do the head-to-head table
-	biggermat = getHeadToHeadTable()
+	biggermat, head_to_head_2d = getHeadToHeadTable()
 
 	return shortcuts.render_to_response('home.html',{'players': players, 'config': getClotConfig(), 'games': games, 
 			'biggermat':biggermat})

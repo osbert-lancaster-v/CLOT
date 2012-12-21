@@ -15,15 +15,19 @@ import logging
 from clot import *
 import cron
 
+import tournament_swiss
+
 
 def test(request):
 	logging.info('in test()')
 
 	#setRanks()
 	#createGames()
-	logging.info("about to call cron.go(dummy)")
-	cron.go("dummy")
-	logging.info("called cron.go(dummy)")
+	#logging.info("about to call cron.go(dummy)")
+	#cron.go("dummy")
+	#logging.info("called cron.go(dummy)")
+	
+	tournament_swiss.getMatchedList()
 	
 	#return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
 	return shortcuts.render_to_response(
