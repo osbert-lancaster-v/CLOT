@@ -6,16 +6,32 @@ from google.appengine.ext.db import djangoforms
 import django
 from django import http
 from django import shortcuts
-from clot import *
-from django.utils import simplejson as json
+
 import httplib
 import urllib
 import random
 import logging
 
-def test(request):
+from clot import *
+import cron
 
-	return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
+
+def test(request):
+	logging.info('in test()')
+
+	#setRanks()
+	#createGames()
+	logging.info("about to call cron.go(dummy)")
+	cron.go("dummy")
+	logging.info("called cron.go(dummy)")
+	
+	#return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
+	return shortcuts.render_to_response(
+	'test.html', {'testdata': 'foo unkn'}
+	#'test.html', {'testdata': setRanks()}
+	)
+	
+	logging.info('leaving test()')
 
 
 

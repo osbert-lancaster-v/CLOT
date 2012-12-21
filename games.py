@@ -19,12 +19,20 @@ class Game(db.Model):
 	The __repr__ function is just used for debugging."""
 
 	winner = db.IntegerProperty()
+	loser = db.IntegerProperty()
+	#winnerName = db.StringProperty()  #added by unkn 
 	wlnetGameID = db.IntegerProperty(required=True)
 	name = db.StringProperty()
 	dateCreated = db.DateTimeProperty(auto_now_add=True)
 	dateEnded = db.DateTimeProperty()
+
+	teams=[]                                  #added by unkn 
+	winningTeamName = db.StringProperty(default='not known as of yet')  #added by unkn 
+
+
 	def __repr__(self):
 		return str(self.key().id()) + " wlnetGameID=" + str(self.wlnetGameID)
+
 
 
 class GamePlayer(db.Model):
@@ -37,7 +45,7 @@ class GamePlayer(db.Model):
 
 def createGame(players, templateID):
 	"""This calls the WarLight.net API to create a game, and then creates the Game and GamePlayer rows in the local DB"""
-	gameName = ' vs '.join([p.name for p in players])[:50]
+	gameName = ' vs '.join([p.name for p in players])[:50]  #game names are limited to %) characters by the api
 
 	config = getClotConfig()
 	apiRetStr = postToApi('/API/CreateGame', json.dumps( { 
@@ -45,7 +53,7 @@ def createGame(players, templateID):
 															 'hostAPIToken': config.adminApiToken,
 															 'templateID': templateID,
 															 'gameName': gameName,
-															 'personalMessage': '',
+															 'personalMessage': 'a game from one of unknwonsoldiers tourneys',
 															 'players': [ { 'token': p.inviteToken, 'team': 'None' } for p in players]
 															 }))
 	apiRet = json.loads(apiRetStr)
@@ -59,6 +67,8 @@ def createGame(players, templateID):
 
 	for p in players:
 		GamePlayer(playerID = p.key().id(), gameID = g.key().id()).save()
+		#teams.append()
+
 
 	logging.info("Created game " + str(g.key().id()) + " '" + gameName + "'")
 

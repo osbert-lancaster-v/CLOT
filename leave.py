@@ -15,6 +15,8 @@ from main import getClotConfig
 from main import group
 from players import Player
 
+##from django.utils.encoding import smart_str, smart_unicode   #needed for non-unicode characters
+
 
 class LeaveForm(forms.Form):
 	inviteToken = forms.CharField(label="Invite Token")
@@ -42,6 +44,7 @@ def go(request):
 	player.isParticipating = False
 	player.save()
 
-	logging.info("Player left ladder " + str(player))
+	logging.info("Player left ladder ")
+	logging.info(player)
 	return http.HttpResponseRedirect('/player/' + str(player.key().id()))
 

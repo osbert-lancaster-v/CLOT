@@ -21,9 +21,18 @@ class Player(db.Model):
 	created = db.DateTimeProperty(auto_now_add=True)
 	modified = db.DateTimeProperty(auto_now=True)
 	isMember = db.BooleanProperty()
+	numWins = db.IntegerProperty(default=0) #added by unkn
+	player_id = db.StringProperty(default='still in play') #added by unkn
 
 	def __repr__(self):
 		return str(self.key().id()) + " " + self.name
+	def __unicode__(self):
+		return self.name
+	
+	###def __init__(self):
+		###self.player_id = str(self.key().id())
+		###self.player_id = 'xxx'
+		###self.save()
 
 class EditPlayerForm(djangoforms.ModelForm):
 	class Meta:

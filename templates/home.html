@@ -9,34 +9,66 @@
         <tr>
             <td>Rank</td>
             <td>Player</td>
+            <td>name</td>
+            <td>player_id</td>           
+            <td>Member</td>
+            <td>number of wins</td>
+            <td>currently participating</td>
         </tr>
     </thead>
     {%for player in players%}
     <tr>
-        
         <td>{{player.currentRank}}</td>
         <td><a href="player/{{player.key.id}}">{{player.name|escape}}</a></td>
+        <td>{{player.name}}</td>
+        <td>{{player.player_id}}</td>
+        <td>{{player.isMember}}</td>
+        <td>{{player.numWins}}</td>   
+        <td>{{player.isParticipating}}</td>
     </tr>
     {%endfor%}
 </table>
 
-<h2>Games</h2>
 
+<h2>Games</h2>
 <table border="1">
     <thead>
         <tr>
             <td>Game</td>
+            <td>winner</td>
+            <td>winningTeamName</td>
+            <td>dateCreated</td>
         </tr>
     </thead>
     {%for game in games%}
     
     <tr>
         <td><a href="http://warlight.net/MultiPlayer?GameID={{ game.wlnetGameID}}">{{game.name}}</a></td>
+        <td>{{game.winner}}</td>        
+        <td>{{game.winningTeamName}}</td>
+        <td>{{game.dateCreated}}</td>
     </tr>
-
     {%endfor%}
 </table>
 
+
+
+<h2>HeadToHeadRecord</h2>
+<table border="1">
+    {%for p in biggermat%}
+    <tr>
+        {%for o in p%}
+            <td>{{o}}</td>
+        {%endfor%}
+    </tr>
+    {%endfor%}
+</table>
+
+
+
+
 <br /><a href="/join">Join</a> | <a href="/leave">Leave</a>
+
+
 
 {%endblock%}

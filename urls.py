@@ -23,5 +23,6 @@ urlpatterns = patterns(
 	(r'^player/(\d+)$', 'viewplayer.go'),
 	(r'^setup$', 'main.setup'),
 	(r'^test$', 'test.test'),
+	(r'^testcron$', 'testcron.testcron'),
 	(r'^cron$', 'cron.go')
 	)

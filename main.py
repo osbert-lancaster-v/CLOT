@@ -6,6 +6,7 @@ from google.appengine.ext.db import djangoforms
 import django
 import httplib
 import urllib
+import logging
 
 from itertools import groupby
 
@@ -54,7 +55,7 @@ def setup(request):
 	return http.HttpResponseRedirect('/')
 
 wlnet = 'warlight.net'
-	
+
 
 def hitapi(api, params):
 	config = getClotConfig()
@@ -75,8 +76,8 @@ def hitapiwithauth(api, params, email, apitoken):
 	conn.close()
 	return ret
 
-def postToApi(api, postData):	
-	#logging.info("POSTing to " + api + ", data=" + postData)
+def postToApi(api, postData):
+	logging.info("POSTing to " + api + ", data=" + postData)
 
 	conn = httplib.HTTPConnection(wlnet, 80)
 	conn.connect()

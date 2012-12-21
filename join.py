@@ -15,6 +15,7 @@ from main import getClotConfig
 from main import group
 from players import Player
 
+##from django.utils.encoding import smart_str, smart_unicode   #needed for non-unicode characters
 
 class JoinForm(forms.Form):
 	inviteToken = forms.CharField(label="Invite Token")
@@ -48,13 +49,23 @@ def go(request):
 		return http.HttpResponseRedirect('/player/' + str(existing.key().id()))
 
 	data = json.loads(apiret)
-	player = Player(inviteToken=inviteToken, name=data['name'], color=data['color'], isMember=data['isMember'].lower() == 'true')
+
+	player_name = data['name']
+	if type(data['name']) is unicode:
+		logging.info('dealing with unicode player name ...')
+		player_name = player_name.encode('ascii','ignore')  #this deals with special characters that would mess up our code, by removing them. 
+		logging.info('player_name:')
+		logging.info(player_name)
+		logging.info('player-name looks ok or not?')
+
+	player = Player(inviteToken=inviteToken, name=player_name, color=data['color'], isMember=data['isMember'].lower() == 'true') 
 
 	if getClotConfig().membersOnly and not player.isMember:
 		form.errors['inviteToken'] = 'This site only allows members to join.	See the Membership tab on WarLight.net for information about memberships.'
 		return shortcuts.render_to_response('join.html', {'form': form})
 
 	player.put()
-	logging.info("Created player " + str(player))
+	logging.info("PCreated player")
+	logging.info(player)
 	
 	return http.HttpResponseRedirect('/player/' + str(player.key().id()))
