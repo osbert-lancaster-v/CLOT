@@ -10,10 +10,15 @@ import logging
 from django import http
 from django import shortcuts
 from django import newforms as forms
-from main import hitapi
-from main import getClotConfig
-from main import group
-from players import Player
+#from main import hitapi
+#from main import getClotConfig
+#from main import group
+#from players import Player
+
+import tournament_swiss
+import main
+import players
+
 
 ##from django.utils.encoding import smart_str, smart_unicode   #needed for non-unicode characters
 
@@ -25,6 +30,19 @@ def go(request):
 
 	form = JoinForm(data=request.POST or None)
 
+	#hack.  
+	players_are_gated_q = False
+	if main.arePlayersGated():
+		players_are_gated_q = True
+		logging.info('players_are_gated_q = '+str(players_are_gated_q))
+		return http.HttpResponseRedirect('/players_are_gated')
+	logging.info('players_are_gated_q = '+str(players_are_gated_q))
+
+	if players.numPlayersParticipating() >= main.getMaximumNumberOfPlayers():
+		logging.info('players_are_gated_q = '+str(players_are_gated_q))
+		return http.HttpResponseRedirect('/cannot_join')
+	logging.info('players_are_gated_q = '+str(players_are_gated_q))
+
 	if not request.POST:
 		return shortcuts.render_to_response('join.html', {'form': form})
 
@@ -34,14 +52,14 @@ def go(request):
 	inviteToken = form.clean_data['inviteToken']
 
 	#Call the warlight API to get the name, color, and verify that the invite token is correct
-	apiret = hitapi('/API/ValidateInviteToken', { 'Token':  inviteToken })
+	apiret = main.hitapi('/API/ValidateInviteToken', { 'Token':  inviteToken })
 
 	if not "tokenIsValid" in apiret:
 		form.errors['inviteToken'] = 'The supplied invite token is invalid. Please ensure you copied it from WarLight.net correctly.'
 		return shortcuts.render_to_response('join.html', {'form': form})
 
 	#Ensure this invite token doesn't already exist
-	existing = Player.all().filter('inviteToken =', inviteToken).get()
+	existing = players.Player.all().filter('inviteToken =', inviteToken).get()
 	if existing:
 		#If someone tries to join when they're already in the DB, just set their isParticipating flag back to true
 		existing.isParticipating = True
@@ -58,9 +76,9 @@ def go(request):
 		logging.info(player_name)
 		logging.info('player-name looks ok or not?')
 
-	player = Player(inviteToken=inviteToken, name=player_name, color=data['color'], isMember=data['isMember'].lower() == 'true') 
+	player = players.Player(inviteToken=inviteToken, name=player_name, color=data['color'], isMember=data['isMember'].lower() == 'true') 
 
-	if getClotConfig().membersOnly and not player.isMember:
+	if main.getClotConfig().membersOnly and not player.isMember:
 		form.errors['inviteToken'] = 'This site only allows members to join.	See the Membership tab on WarLight.net for information about memberships.'
 		return shortcuts.render_to_response('join.html', {'form': form})
 
@@ -69,3 +87,5 @@ def go(request):
 	logging.info(player)
 	
 	return http.HttpResponseRedirect('/player/' + str(player.key().id()))
+
+

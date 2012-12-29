@@ -7,16 +7,18 @@ import django
 import logging
 from django import http
 from django import shortcuts
-from players import Player
-from games import Game
-from games import GamePlayer
-from main import group
-from main import ClotConfig
-from main import getClotConfig
+#from players import Player
+#from games import Game
+#from games import GamePlayer
+#from main import group
+#from main import ClotConfig
+#from main import getClotConfig
 
 from copy import deepcopy
 
 import clot
+import main
+import players
 
 
 ###########################################
@@ -33,14 +35,21 @@ def getHeadToHeadTable():
 	logging.info('players_id_name_dict')
 	logging.info(players_id_name_dict)
 
+	#get list of players, sorted by currentRank, highest First.
+	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all()]
+	players_sorted_by_rank.sort(key=lambda x: x[1])
+	players_ids_sorted_by_rank = [int(p[0]) for p in players_sorted_by_rank]
+	##logging.info('players_ids_sorted_by_rank')
+	##logging.info(players_ids_sorted_by_rank)
+
 	#Group finished games by who won
-	finishedGamesGroupedByWinner = group(finishedGames, lambda g: g.winner)
+	finishedGamesGroupedByWinner = main.group(finishedGames, lambda g: g.winner)
 	logging.info("finishedGamesGroupedByWinner:")
 	logging.info(finishedGamesGroupedByWinner)
 
 	#make the head-to-head table
-	head_to_head_2d = [[getHeadToHead(p,o,finishedGamesGroupedByWinner) for o in players_id_name_dict] for p in players_id_name_dict]
-	players_for_h2h = [p for p in players_id_name_dict]
+	head_to_head_2d = [[getHeadToHead(p,o,finishedGamesGroupedByWinner) for o in players_ids_sorted_by_rank] for p in players_ids_sorted_by_rank]
+	players_for_h2h = [p for p in players_ids_sorted_by_rank]
 	logging.info('head_to_head_2d:')
 	logging.info(head_to_head_2d)
 

@@ -11,7 +11,7 @@
             <div style="border-radius: 8px; width: 40px; height: 40px;  background-color: {{player.color}}"></div> 
         </td>
         <td>
-            ***terrible name*** <h1>{{player.name|escape}}</h1>
+            <h1>{{player.name|escape}}</h1>
         </td>
     </tr>
 
@@ -19,6 +19,7 @@
 
 <a href="http://warlight.net/Profile?p={{player.inviteToken}}">WarLight.net profile</a><br />
 Current Rank: {{player.currentRank}}<br />
+player_id:  {{player.playerID}}<br />
 Is participating: {{player.isParticipating}}<br />
 First joined: {{player.created}}<br />
 

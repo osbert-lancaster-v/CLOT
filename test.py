@@ -12,7 +12,7 @@ import urllib
 import random
 import logging
 
-from clot import *
+#from clot import *
 import cron
 
 import tournament_swiss
@@ -27,7 +27,7 @@ def test(request):
 	#cron.go("dummy")
 	#logging.info("called cron.go(dummy)")
 	
-	tournament_swiss.getMatchedList()
+	tournament_swiss.getMatchedList_Swiss()
 	
 	#return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
 	return shortcuts.render_to_response(

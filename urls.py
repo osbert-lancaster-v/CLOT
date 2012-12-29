@@ -15,6 +15,10 @@
 
 from django.conf.urls.defaults import *
 
+###from django.contrib import admin
+###from admin_site import admin_site
+
+
 urlpatterns = patterns(
 	'',
 	(r'^$', 'home.index'),
@@ -24,5 +28,8 @@ urlpatterns = patterns(
 	(r'^setup$', 'main.setup'),
 	(r'^test$', 'test.test'),
 	(r'^testcron$', 'testcron.testcron'),
-	(r'^cron$', 'cron.go')
+	(r'^cron$', 'cron.go'),
+	(r'^players_are_gated$','players_are_gated.go'),
+	(r'^cannot_join$','players_are_gated.cannot_join'),
+	###('^admin/', include(admin.site.urls)),
 	)

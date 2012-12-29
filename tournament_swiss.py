@@ -6,22 +6,31 @@ from copy import deepcopy
 from mwmatching import maxWeightMatching
 import new_utility_functions
 
-
-#edges = [(1,2,-10) , (3,4,-100) , (1,3,-20) , (2,4,-30)]
-#ans = maxWeightMatching(edges,True)
-#print ans
-
-
-#make list of player pairs, and their (-ve) separation in #wins
-#eg [(1,2,-1) , (3,4,-10) , (1,3,-2) , (2,4,-3)]  #[(playera,playerb,-separation) , (.... ),....]
-#edges = [(1,2,-1) , (3,4,-10) , (1,3,-2) , (2,4,-3)]
-
-#get the matchups
-#matchups[player_number] = player_number_of_new_opponent 
-#matchups = maxWeightMatching(edges,True)
+import main
+#from players import Player
+import players
 
 
-def getMatchedList():
+def seeIfTourneyCanStart():
+	
+	ppp = players.Player.all()
+	count = 0
+	for p in ppp:
+		if p.isParticipating:
+			count += 1
+	
+	if count >= main.getMinimumNumberOfPlayers():
+		if (not main.isTourneyInPlay()) and (not main.hasTourneyFinished()):
+			if main.areWePastStarttime():
+				main.startTourney()
+				logging.info('tourney starting')
+				return True
+	else:
+		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers()))
+		return False
+
+
+def getMatchedList_Swiss():
 
 	#head_to_head_biggermat
 	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable()
@@ -78,7 +87,7 @@ def getMatchedList():
 	if not matchups:
 		return [] #we havent got any matchups.  likely that the tournament is over. 
 
-	#package mathups into right format
+	#package matchups into right format
 	doneq = [False] * num_players
 	new_match_list = []
 	for i in range(0,num_players):

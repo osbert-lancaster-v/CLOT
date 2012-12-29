@@ -8,9 +8,11 @@ from django.utils import simplejson as json
 
 from django import http
 from django import shortcuts
-from main import hitapi
-from main import getClotConfig
-from main import group
+#from main import hitapi
+#from main import getClotConfig
+#from main import group
+
+
 
 class Player(db.Model):
 	name = db.StringProperty()
@@ -22,17 +24,16 @@ class Player(db.Model):
 	modified = db.DateTimeProperty(auto_now=True)
 	isMember = db.BooleanProperty()
 	numWins = db.IntegerProperty(default=0) #added by unkn
-	player_id = db.StringProperty(default='still in play') #added by unkn
+	player_id = db.StringProperty(default='not yet known') #added by unkn
 
 	def __repr__(self):
 		return str(self.key().id()) + " " + self.name
 	def __unicode__(self):
 		return self.name
-	
-	###def __init__(self):
-		###self.player_id = str(self.key().id())
-		###self.player_id = 'xxx'
-		###self.save()
+
+def numPlayersParticipating():
+	players_participating = [p for p in Player.all() if p.isParticipating]
+	return len(players_participating)
 
 class EditPlayerForm(djangoforms.ModelForm):
 	class Meta:
@@ -46,7 +47,6 @@ def edit(request, player_id):
 	if player is None:
 		return http.HttpResponseNotFound('No player exists with that key (%r)' %
 																			 player_id)
-	
 
 	form = EditPlayerForm(data=request.POST or None, instance=player)
 

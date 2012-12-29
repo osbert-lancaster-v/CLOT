@@ -35,7 +35,7 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 # although not all variations may be possible on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Los_Angeles'  # i.e., Mountain View
+TIME_ZONE = 'GMT' #'America/Los_Angeles'  # i.e., Mountain View
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
@@ -72,7 +72,8 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = (    
+    'django.middleware.common.CommonMiddleware',  #added by unkn
 )
 
 ROOT_URLCONF = 'urls'
@@ -87,4 +88,5 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.contenttypes',
+    'django.contrib.auth'
 )

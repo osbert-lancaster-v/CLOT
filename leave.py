@@ -10,10 +10,14 @@ import logging
 from django import http
 from django import shortcuts
 from django import newforms as forms
-from main import hitapi
-from main import getClotConfig
-from main import group
-from players import Player
+#from main import hitapi
+#from main import getClotConfig
+#from main import group
+#from players import Player
+
+import tournament_swiss
+import main
+import players
 
 ##from django.utils.encoding import smart_str, smart_unicode   #needed for non-unicode characters
 
@@ -26,6 +30,14 @@ def go(request):
 
 	form = LeaveForm(data=request.POST or None)
 
+	#hack.  
+	players_are_gated_q = False
+	if main.arePlayersGated():
+		players_are_gated_q = True
+		logging.info('players_are_gated_q = '+str(players_are_gated_q))
+		return http.HttpResponseRedirect('/players_are_gated')
+	logging.info('players_are_gated_q = '+str(players_are_gated_q))
+
 	if not request.POST:
 		return shortcuts.render_to_response('leave.html', {'form': form})
 
@@ -35,7 +47,7 @@ def go(request):
 	inviteToken = form.clean_data['inviteToken']
 
 	#Find the player by their token
-	player = Player.all().filter('inviteToken =', inviteToken).get()
+	player = players.Player.all().filter('inviteToken =', inviteToken).get()
 	if not player:
 		form.errors['inviteToken'] = 'Invite token is invalid.'
 		return shortcuts.render_to_response('leave.html', {'form': form})

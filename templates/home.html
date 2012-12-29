@@ -3,6 +3,10 @@
 
 <h1>{{config.name|escape}}</h1>
 
+<h2>{{tourney_type_string}}</h2>
+
+<h2>{{tourney_status_string}}</h2>
+
 <h2>Players</h2>
 <table border="1">
     <thead>
@@ -63,9 +67,13 @@
     {%endfor%}
 </table>
 
+<h3>{{players_gated_string}}</h3>
+<h4>{{minNumPlayersString}}</h4>
+<h4>{{maxNumPlayersString}}</h4>
+<h4>{{starttimeString}}</h4>
+<h4>{{currentTimeString}}</h4>
 
-
-
+<h2>{{tourney_status_string}}</h2>
 
 <br /><a href="/join">Join</a> | <a href="/leave">Leave</a>
 

@@ -8,10 +8,15 @@ from django.utils import simplejson as json
 import logging
 from django import http
 from django import shortcuts
-from main import postToApi
-from main import hitapi
-from main import getClotConfig
-from players import Player
+#from main import postToApi
+#from main import hitapi
+#from main import getClotConfig
+#from players import Player
+
+import main
+import players
+import games
+
 
 class Game(db.Model):
 	"""Represents a game.  This has its own ID local to the CLOT, but it also stores wlnetGameID which is the ID of the game on WarLight.net.
@@ -25,8 +30,8 @@ class Game(db.Model):
 	name = db.StringProperty()
 	dateCreated = db.DateTimeProperty(auto_now_add=True)
 	dateEnded = db.DateTimeProperty()
+	legitimateGame = db.BooleanProperty(default=True)
 
-	teams=[]                                  #added by unkn 
 	winningTeamName = db.StringProperty(default='not known as of yet')  #added by unkn 
 
 
@@ -39,22 +44,23 @@ class GamePlayer(db.Model):
 	"""Represents a player in a game.  Each game will have at least two corresponding rows in this table."""
 	gameID = db.IntegerProperty(required=True)
 	playerID = db.IntegerProperty(required=True)
+	state = db.StringProperty()
 	def __repr__(self):
-		return "gameID=" + str(self.gameID) + ",playerID=" + str(self.playerID)
+		return "gameID=" + str(self.gameID) + ",playerID=" + str(self.playerID) + ",state=" + str(self.state)
 
 
-def createGame(players, templateID):
+def createGame(the_players, templateID):
 	"""This calls the WarLight.net API to create a game, and then creates the Game and GamePlayer rows in the local DB"""
-	gameName = ' vs '.join([p.name for p in players])[:50]  #game names are limited to %) characters by the api
+	gameName = ' vs '.join([p.name for p in the_players])[:50]  #game names are limited to %) characters by the api
 
-	config = getClotConfig()
-	apiRetStr = postToApi('/API/CreateGame', json.dumps( { 
+	config = main.getClotConfig()
+	apiRetStr = main.postToApi('/API/CreateGame', json.dumps( { 
 															 'hostEmail': config.adminEmail, 
 															 'hostAPIToken': config.adminApiToken,
 															 'templateID': templateID,
 															 'gameName': gameName,
 															 'personalMessage': 'a game from one of unknwonsoldiers tourneys',
-															 'players': [ { 'token': p.inviteToken, 'team': 'None' } for p in players]
+															 'players': [ { 'token': p.inviteToken, 'team': 'None' } for p in the_players]
 															 }))
 	apiRet = json.loads(apiRetStr)
 
@@ -65,11 +71,11 @@ def createGame(players, templateID):
 	g = Game(wlnetGameID=gid, name=gameName)
 	g.save()
 
-	for p in players:
-		GamePlayer(playerID = p.key().id(), gameID = g.key().id()).save()
+	for p in the_players:
+		games.GamePlayer(playerID = p.key().id(), gameID = g.key().id()).save()
 		#teams.append()
-
 
 	logging.info("Created game " + str(g.key().id()) + " '" + gameName + "'")
 
 	return g
+
