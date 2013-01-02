@@ -15,8 +15,6 @@
 
 from django.conf.urls.defaults import *
 
-###from django.contrib import admin
-###from admin_site import admin_site
 
 
 urlpatterns = patterns(

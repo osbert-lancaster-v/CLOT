@@ -12,7 +12,9 @@ import urllib
 import random
 import logging
 
-#from clot import *
+
+#the stuff here is just for testing.  visit /test on the webpage to call this code. 
+
 import cron
 
 import tournament_swiss

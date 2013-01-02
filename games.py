@@ -8,10 +8,6 @@ from django.utils import simplejson as json
 import logging
 from django import http
 from django import shortcuts
-#from main import postToApi
-#from main import hitapi
-#from main import getClotConfig
-#from players import Player
 
 import main
 import players

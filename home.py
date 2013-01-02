@@ -7,20 +7,17 @@ import django
 import logging
 from django import http
 from django import shortcuts
-#from players import Player
-#from games import Game
-#from games import GamePlayer
-#from main import group
-#from main import ClotConfig
-#from main import getClotConfig
 
-from new_utility_functions import getHeadToHeadTable
-import tournament_swiss
+from copy import deepcopy
+
+import new_utility_functions
 import main
 import games
 import players
 
-from copy import deepcopy
+
+#maybe you need tournament-type specific things here, maybe
+import tournament_swiss
 
 
 def index(request):
@@ -58,7 +55,7 @@ def index(request):
 
 
 	#do the head-to-head table
-	biggermat, head_to_head_2d = getHeadToHeadTable()
+	biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable()
 	biggermat_str = deepcopy(biggermat)
 	for i in range(1,len(biggermat_str)):
 		for j in range(1,len(biggermat_str[i])):
@@ -89,6 +86,15 @@ def index(request):
 	starttimeString = 'starttime will be:  '+str(main.getStarttime())+'    provided we have minimum number of players.'
 	currentTimeString = 'current time =     '+str(main.getCurrentTime())
 	tourney_type_string = str(main.getTourneyType()) + ' tourney'
+	how_long_you_have_to_join_games_string = 'You have '+str(main.getHowLongYouHaveToJoinGames())+' minutes to join your auto-created games.  After that you may lose that game!!'
+	template_id = main.getTemplateID()
+
+	#things for specific tourney types
+	if main.getTourneyType()=='swiss':
+		swiss_games_info_table = tournament_swiss.getTourneyRoundsAndGameInfo()
+	else:
+		swiss_games_info_table = 0
+	#end of things for specific tourney types
 
 	return shortcuts.render_to_response('home.html',{'players': the_players, 'config': main.getClotConfig(), 'games': the_games, 
 			'biggermat':biggermat_str,
@@ -98,6 +104,11 @@ def index(request):
 			'tourney_status_string':tourney_status_string,
 			'starttimeString':starttimeString,
 			'currentTimeString':currentTimeString,
-			'tourney_type_string':tourney_type_string
+			'tourney_type_string':tourney_type_string,
+			'how_long_you_have_to_join_games_string':how_long_you_have_to_join_games_string,
+			'template_title_string':'Game Template',
+			'template_id':template_id,
+			'swiss_games_info_table':swiss_games_info_table
 			})
+
 

@@ -16,7 +16,12 @@ from django import shortcuts
 from datetime import datetime
 
 import clot
+import new_utility_functions
+
+#also, import the files for your own special tournament types
 import tournament_swiss
+import tournament_roundrobin
+import tournament_randommatchup
 
 
 #this is the main class for a tournament.
@@ -56,22 +61,22 @@ def getTourneyType():
 def seeIfTourneyCanStart():
 	tourney_type = getTourneyType()
 	if tourney_type == 'swiss':
-		return tournament_swiss.seeIfTourneyCanStart()
+		return tournament_swiss.seeIfTourneyCanStart_Swiss() #we use the swiss version of this function
 	elif tourney_type == 'roundrobin':
-		return tournament_swiss.seeIfTourneyCanStart()
+		return new_utility_functions.seeIfTourneyCanStart() #we use the default function
 	elif tourney_type == 'randommatchup':
-		return tournament_swiss.seeIfTourneyCanStart()
+		return new_utility_functions.seeIfTourneyCanStart() #we use the default function
 	else:
 		assert(False) #no valid fn
 
 def createGames():
 	tourney_type = getTourneyType()
 	if tourney_type == 'swiss':
-		return clot.createGames_Swiss()
+		return tournament_swiss.createGames_Swiss() #we use the swiss version of this function
 	elif tourney_type == 'roundrobin':
-		return clot.createGames_RoundRobin()
+		return tournament_roundrobin.createGames_RoundRobin()
 	elif tourney_type == 'randommatchup':
-		return clot.createGames_RandomMatchup()
+		return tournament_randommatchup.createGames_RandomMatchup()
 	else:
 		assert(False) #no valid fn
 

@@ -10,12 +10,8 @@ import logging
 from django import http
 from django import shortcuts
 from django import newforms as forms
-#from main import hitapi
-#from main import getClotConfig
-#from main import group
-#from players import Player
 
-import tournament_swiss
+
 import main
 import players
 

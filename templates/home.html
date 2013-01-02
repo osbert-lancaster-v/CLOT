@@ -33,6 +33,18 @@
     {%endfor%}
 </table>
 
+{% if swiss_games_info_table %}
+<h2>Swiss Rounds</h2>
+<table border="1">
+    {%for round in swiss_games_info_table%}
+        <tr>
+            {%for game in round%}
+                <td>{{game}}</td>
+            {%endfor%}
+        </tr>
+    {%endfor%}
+{% endif %}
+</table>
 
 <h2>HeadToHeadRecord</h2>
 <table border="1">
@@ -72,6 +84,8 @@
 <h4>{{maxNumPlayersString}}</h4>
 <h4>{{starttimeString}}</h4>
 <h4>{{currentTimeString}}</h4>
+<h4>{{how_long_you_have_to_join_games_string}}</h4>
+<td><a href="http://warlight.net/MultiPlayer?TemplateID={{ template_id}}">{{template_title_string}}</a></td>
 
 <h2>{{tourney_status_string}}</h2>
 

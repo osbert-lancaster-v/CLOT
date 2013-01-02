@@ -8,22 +8,16 @@ import datetime
 from django import shortcuts
 from django.utils import simplejson as json
 import logging
+import random
+
 
 import clot
-#from games import Game
-#from games import GamePlayer
-#from main import hitapi
-#from players import Player
-
-
-import tournament_swiss
 import main
 import games
 import players
 
-import random
 
-
+#this function is called at set time intervals by the appengine
 def go(request):
 	logging.info("Starting cron...")
 	checkInProgressGames()
@@ -57,23 +51,6 @@ def checkInProgressGames():
 		data = json.loads(apiret)
 		state = data.get('state', 'err')
 
-
-		#debug
-		logging.info('data:')
-		logging.info(data)
-
-		ppp = data.get('players')
-		logging.info('ppp:')
-		logging.info(ppp)
-
-		##logging.info('+++++++++++++++++++++++++++')
-		##apiret22 = main.hitapi('/API/QueryGame?GameID=' + str(g.wlnetGameID),    { 'GetHistory':  'true' })
-		##tmp = json.loads(apiret22)
-		##logging.info('tmp:')
-		##logging.info(tmp)
-		#end of debug
-
-
 		if state == 'err': raise Exception("GameFeed API failed.  Message = " + data.get('error', apiret))
 
 		if state == 'Finished':
@@ -89,10 +66,6 @@ def checkInProgressGames():
 			g.save()
 		else:
 			#It's still going.
-			
-			#g.winningTeamName = 'bill' #winner.key().name()
-			#g.save()
-			
 			
 			#terminate games that have not started for a long time. 
 			if state == 'WaitingForPlayers':

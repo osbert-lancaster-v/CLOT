@@ -12,7 +12,7 @@ import httplib
 import urllib
 import logging
 
-import clot
+
 import cron
 import main
 

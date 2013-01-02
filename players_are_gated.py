@@ -13,7 +13,7 @@ import urllib
 import random
 import logging
 
-#from clot import *
+
 import cron
 
 

@@ -7,12 +7,7 @@ import django
 import logging
 from django import http
 from django import shortcuts
-#from players import Player
-#from games import Game
-#from games import GamePlayer
-#from main import group
-#from main import ClotConfig
-#from main import getClotConfig
+
 
 from copy import deepcopy
 
@@ -23,7 +18,29 @@ import players
 
 ###########################################
 
+def seeIfTourneyCanStart():
+	"""this is the default function, if no special one is specified for the tourney type chosen"""
+	
+	ppp = players.Player.all()
+	count = 0
+	for p in ppp:
+		if p.isParticipating:
+			count += 1
+	
+	if count >= main.getMinimumNumberOfPlayers():
+		if (not main.isTourneyInPlay()) and (not main.hasTourneyFinished()):
+			if main.areWePastStarttime():
+				main.startTourney()
+				logging.info('tourney starting')
+				return True
+	else:
+		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers()))
+		return False
+
+
 def getHeadToHeadTable():
+	"""returns a table of the player's head to head results.
+	see end of the function for exactly what is returned"""
 
 	#Load all finished games
 	finishedGames = clot.getFinishedGames()
@@ -79,7 +96,7 @@ def getHeadToHead(team_a_id,team_b_id,finishedGamesGroupedByWinner):
 	"""given 2 player_id s and the list of finished games, 
 	calculate their head-to-head wins"""
 
-	logging.info('in getHeadToHead(....)')
+	##logging.info('in getHeadToHead(....)')
 	
 	num_team_a_wins = 0
 	if team_a_id in finishedGamesGroupedByWinner.keys():
@@ -95,7 +112,8 @@ def getHeadToHead(team_a_id,team_b_id,finishedGamesGroupedByWinner):
 			if game.loser == team_a_id:
 				num_team_b_wins+=1
 
-	logging.info([num_team_a_wins,num_team_b_wins])
+	##logging.info([num_team_a_wins,num_team_b_wins])
+	
 	return [num_team_a_wins,num_team_b_wins]
 
 

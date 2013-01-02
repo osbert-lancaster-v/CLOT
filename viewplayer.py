@@ -8,12 +8,7 @@ from django.utils import simplejson as json
 
 from django import http
 from django import shortcuts
-#from main import hitapi
-#from main import getClotConfig
-#from main import group
-#from games import GamePlayer
-#from games import Game
-#from players import Player
+
 
 import players
 import games
