@@ -5,8 +5,6 @@ from copy import deepcopy
 
 from mwmatching import maxWeightMatching
 import new_utility_functions
-
-
 import main
 import players
 import games

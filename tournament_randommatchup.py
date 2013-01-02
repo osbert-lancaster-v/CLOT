@@ -1,8 +1,8 @@
 
 import logging
+import random
 
 import new_utility_functions
-
 import main
 import players
 import games
