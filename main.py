@@ -80,6 +80,11 @@ def getTourneyName(tourney_id):
 		return c.name
 	assert False #should not have got here
 
+def doesTourneyExist(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
+		return True
+	return False #seems tourney with this tourney_id does not exist
+
 def getIfRequirePasswordToJoin(tourney_id):
 	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.requirePasswordToJoin

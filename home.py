@@ -22,27 +22,26 @@ import tournament_swiss
 
 def index(request):    #deprecated
 	"""Request / """
-
 	return shortcuts.render_to_response('home.html',{'nowt': 'nowt' })
 
 
 
 def index_new(request,tourney_id):
 	"""Request / """
+	logging.info('in index_new(' +str(tourney_id)+ ')')
+
 	tourney_id = int(tourney_id)
 	logging.info('tourney_id = '+str(tourney_id))
+
+	if not main.doesTourneyExist(tourney_id):
+		logging.info('tourney does not exist, redirecting user to tourneys info instead')
+		return shortcuts.render_to_response('tourney_does_not_exist.html' )
 
 	#Gather data used by home.html
 	the_players = players.Player.all().filter("tourney_id =", tourney_id)
 	playersDict = dict([(p.key().id(),p) for p in the_players])
 	logging.info('playersDict')
 	logging.info(playersDict)
-
-#	#added by unkn - puts object id into .player_id data member
-#	for p in the_players:
-#		if p.player_id != str(p.key().id()) #so it has not been set yet.
-#		p.player_id = str(p.key().id())  
-#		p.save()
 
 	#arrange players by rank
 	the_players = players.Player.all().filter("tourney_id =", tourney_id)
@@ -130,11 +129,6 @@ def display_tourneys(request):
 	tourney_list = sorted(tourney_list, key=lambda tourney: tourney.startDate, reverse=True)
 	
 	logging.info('tourney_list = '+str(tourney_list))
-
-#	for tourney in tourney_list:
-#		tourney.tourney_id = tourney.key().id()
-#		tourney.urlpath = 'tourneys/'+str(tourney.tourney_id)
-#		tourney.save()
 
 	return shortcuts.render_to_response('tourneys.html',{'tourney_list': tourney_list
 			})

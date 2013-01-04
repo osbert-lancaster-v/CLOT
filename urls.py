@@ -31,8 +31,9 @@ urlpatterns = patterns(
 	(r'^cannot_join$','players_are_gated.cannot_join'),
 	(r'^tourneys$', 'home.display_tourneys'),
 
-	(r'^tourneys/(\d+)$', 'home.index_new'),
+
 	(r'^tourneys/(\d+)/join$', 'join.go'),
+	(r'^tourneys/(\d+)$', 'home.index_new'),
 	(r'^tourneys/(\d+)/player/(\d+)$', 'viewplayer.go'),
 	
 	(r'^myadmin_players$', 'admin.myadmin_players'),

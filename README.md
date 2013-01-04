@@ -54,6 +54,9 @@ and you will see where those places are).
 
 the .html templates are in templates/...
 
+urls.py lists the urls and the associated functions that are called.  
+note that the regexps (if any) in the url will be passed to the functions as function arguments.
+
 
 NOTE   - the code does NOT know/understand games other than 1v1.
 if you want to add these, please go ahead  :)  (mainly, you need to modify Game and the code that uses Game)
