@@ -64,9 +64,9 @@ def checkInProgressGames(tourney_id):
 
 		if state == 'Finished':
 			#It's finished. Record the winner and save it back.
-			winner = findWinner(data)
+			winner = findWinner(data,tourney_id)
 			logging.info('Identified the winner of game ' + str(g.wlnetGameID) + ' is ' + str(winner))
-			loser = findLoser(data)
+			loser = findLoser(data,tourney_id)
 			logging.info('Identified the loser of game ' + str(g.wlnetGameID) + ' is ' + str(loser))
 			g.winner = winner.key().id()
 			g.loser = loser.key().id()
