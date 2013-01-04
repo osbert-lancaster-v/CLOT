@@ -97,4 +97,9 @@ at the moment, my code has rather too many .info messages,
 but that is because i expect to keep making changes in the future, and so i might still need them.
 
 
+when you have made big changes to your code, maybe you need to reset the appengine.
+locally, you include  --clear_datastore
+whilst for the google appengine, you go to eg https://appengine.google.com/dashboard
+and go to datastore-admin and reset your database objects there.
+
 

@@ -50,7 +50,7 @@ def go(request):
 	inviteToken = form.clean_data['inviteToken']
 
 	#Find the player by their token
-	player = players.Player.all().filter('inviteToken =', inviteToken).get()
+	player = players.Player.all().filter('inviteToken =', inviteToken).filter("tourney_id =", tourney_id).get()
 	if not player:
 		form.errors['inviteToken'] = 'Invite token is invalid.'
 		return shortcuts.render_to_response('leave.html', {'form': form})

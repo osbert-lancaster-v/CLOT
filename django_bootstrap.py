@@ -35,7 +35,7 @@ sys.modules['cPickle'] = pickle
 
 # Enable info logging by the app (this is separate from appserver's
 # logging).
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.DEBUG)  #could be set to INFO instead, to get fewew messages.  
 
 # Force sys.path to have our own directory first, so we can import from it.
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

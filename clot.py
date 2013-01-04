@@ -28,15 +28,13 @@ def setRanks_ByNumWinsOnly(tourney_id):
 	You should replace this with your own ranking logic."""
 	
 	logging.info('in setRanks()')
-	##gamesge = Game.objects.all()
-	##logging.info(gamesge)
 
 	#Load all finished games
-	finishedGames = games.Game.all().filter("winner !=", None)
+	finishedGames = games.Game.all().filter("winner !=", None).filter("tourney_id =", tourney_id)
 	logging.info("finishedGames:")
 	logging.info(finishedGames)
 
-	players_id_name_dict = getPlayersIDNameDict()
+	players_id_name_dict = getPlayersIDNameDict(tourney_id)
 	logging.info('players_id_name_dict')
 	logging.info(players_id_name_dict)
 
@@ -44,20 +42,18 @@ def setRanks_ByNumWinsOnly(tourney_id):
 	finishedGamesGroupedByWinner = main.group(finishedGames, lambda g: g.winner)
 	logging.info("finishedGamesGroupedByWinner:")
 	logging.info(finishedGamesGroupedByWinner)
-	for game in games.Game.all():
+	for game in games.Game.all().filter("tourney_id =", tourney_id):
 		logging.info('game:')
 		logging.info(game)
 		
-		
 		if game.winner != None:
 			pass
-
 
 	#Get rid of the game data, and replace it with the number of games each player won
 	winCounts = dict(map(lambda (playerID,the_games): (playerID, len(the_games)), finishedGamesGroupedByWinner.items())) 
 
 	#Map this from Player.all() to ensure we have an entry for every player, even those with no wins
-	playersMappedToNumWins = [(p, winCounts.get(p.key().id(), 0)) for p in players.Player.all()] 
+	playersMappedToNumWins = [(p, winCounts.get(p.key().id(), 0)) for p in players.Player.all().filter("tourney_id =", tourney_id)] 
 
 	#sort by the number of wins each player has.
 	playersMappedToNumWins.sort(key=lambda (player,numWins): numWins, reverse=True)
@@ -70,11 +66,12 @@ def setRanks_ByNumWinsOnly(tourney_id):
 		logging.info('player:')
 		logging.info(player)
 
-
 	logging.info('setRanks finished')
+
 
 def setRanks(tourney_id):
 	setRanks_WithTiebreaks(tourney_id)
+
 
 def setRanks_WithTiebreaks(tourney_id):
 	"""this function ranks players by number of wins.  
@@ -140,10 +137,9 @@ def setRanks_WithTiebreaks(tourney_id):
 
 
 
-
-
 def getFinishedGames(tourney_id):
 	return games.Game.all().filter("winner !=", None).filter("tourney_id =", tourney_id)
+
 
 def getPlayersIDNameDict(tourney_id):
 	return dict([[p.key().id() , p] for p in players.Player.all().filter("tourney_id =", tourney_id)])

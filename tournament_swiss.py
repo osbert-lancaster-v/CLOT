@@ -92,7 +92,7 @@ def getMatchedList_Swiss(tourney_id):
 	#package matchups into right format
 	doneq = [False] * num_players
 	new_match_list = []
-	for i in range(0,num_players):
+	for i in range(0,len(matchups)):
 		if not doneq[i]:
 			doneq[i]=True
 			j = matchups[i]
@@ -104,8 +104,8 @@ def getMatchedList_Swiss(tourney_id):
 			
 				new_match_list.append(str(i_id))
 				new_match_list.append(str(j_id))
-	if player_who_sits_out >= 0:
-		new_match_list.append(str(playersidlocal_playerids[player_who_sits_out])) #he wont get a game though, because of the odd number
+	##if player_who_sits_out >= 0:
+	##	new_match_list.append(str(playersidlocal_playerids[player_who_sits_out])) #he wont get a game though, because of the odd number
 
 	logging.info('new_match_list')
 	logging.info(new_match_list)
@@ -115,7 +115,7 @@ def getMatchedList_Swiss(tourney_id):
 
 def getTourneyRoundsAndGameInfo(tourney_id):
 	"""this function returns a table of strings, 
-	for display on the /home  html page.  the information is specific to swiss tournaments.
+	for display on the  /tourneys/tourney_id  html page.  the information is specific to swiss tournaments.
 	the information is just a list of the game in each round, showing who won and who lost"""
 	
 	#Load all finished games
@@ -157,7 +157,7 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 		player_game_count[winner_id] += 1
 		player_game_count[loser_id] += 1
 		if (player_game_count[winner_id]>i_round) or (player_game_count[loser_id]>i_round): #we have moved on to the next round
-			assert(player_game_count[winner_id] == player_game_count[loser_id])
+			assert abs( player_game_count[winner_id] - player_game_count[loser_id] ) <= 1
 			i_round += 1
 			
 			if i_round > 1:
@@ -213,7 +213,7 @@ def createGames_Swiss(tourney_id):
 		logging.info('no games in progress.  so we move on to the next round.')
 		
 		if main.getRoundNumber(tourney_id) == main.getNumRounds(tourney_id):
-			main.endTourney()
+			main.endTourney(tourney_id)
 			logging.info('')
 			logging.info('all rounds have been played, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')
