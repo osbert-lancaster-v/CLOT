@@ -1,8 +1,9 @@
 ﻿{%extends "base.html"%}
 {%block body%}
 
-<a href="/">&lt;&lt; Back</a>
 
+<h1> <a href={{tourney_path}}> Tournament  {{tourney_name}}  </a> <br /> </h1>
+tourney_id: {{tourney_id}} <br />
 
 
 <table>
@@ -10,9 +11,7 @@
         <td>
             <div style="border-radius: 8px; width: 40px; height: 40px;  background-color: {{player.color}}"></div> 
         </td>
-        <td>
-            <h1>{{player.name|escape}}</h1>
-        </td>
+        <td> <h1>{{player.name|escape}}</h1> </td>
     </tr>
 
 </table>

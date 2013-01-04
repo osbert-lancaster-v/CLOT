@@ -22,7 +22,7 @@ def pairs(lst):
 	for i in range(1, len(lst), 2):
 		yield lst[i-1], lst[i]
 
-def setRanks_ByNumWinsOnly():
+def setRanks_ByNumWinsOnly(tourney_id):
 	"""This looks at what games everyone has won and sets their currentRank field.
 	The current algorithm is very simple - just award ranks based on number of games won.
 	You should replace this with your own ranking logic."""
@@ -73,10 +73,10 @@ def setRanks_ByNumWinsOnly():
 
 	logging.info('setRanks finished')
 
-def setRanks():
-	setRanks_WithTiebreaks()
+def setRanks(tourney_id):
+	setRanks_WithTiebreaks(tourney_id)
 
-def setRanks_WithTiebreaks():
+def setRanks_WithTiebreaks(tourney_id):
 	"""this function ranks players by number of wins.  
 	then, players who tie on number of wins are separated 
 	by how many wins their beaten opponets have.  
@@ -85,13 +85,13 @@ def setRanks_WithTiebreaks():
 	
 	logging.info('in setRanks_WithTiebreaks()')
 	
-	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable()
+	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable(tourney_id)
 	
 	the_ids = deepcopy(head_to_head_biggermat[0][1:])
 	logging.info('the_ids:')
 	logging.info(the_ids)
 	
-	the_players = players.Player.all()
+	the_players = players.Player.all().filter("tourney_id =", tourney_id)
 	num_players = len(list(the_players))
 	assert(num_players==len(the_ids))
 	
@@ -142,10 +142,10 @@ def setRanks_WithTiebreaks():
 
 
 
-def getFinishedGames():
-	return games.Game.all().filter("winner !=", None)
+def getFinishedGames(tourney_id):
+	return games.Game.all().filter("winner !=", None).filter("tourney_id =", tourney_id)
 
-def getPlayersIDNameDict():
-	return dict([[p.key().id() , p] for p in players.Player.all()])
+def getPlayersIDNameDict(tourney_id):
+	return dict([[p.key().id() , p] for p in players.Player.all().filter("tourney_id =", tourney_id)])
 
 

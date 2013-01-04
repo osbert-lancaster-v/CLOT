@@ -42,5 +42,31 @@ def testcron(request):
 
 
 
+def testcron_one_tourney(request,tourney_id):
+
+	logging.info('in testcron()')
+	
+	###main.gatePlayers()
+	###logging.info('main.arePlayersGated() = '+str(main.arePlayersGated()))
+	###main.unGatePlayers()
+	###logging.info('main.arePlayersGated() = '+str(main.arePlayersGated()))
+
+	#setRanks()
+	#createGames()
+	logging.info("about to call cron.go(dummy)")
+	cron.cron_one_tourney(tourney_id)
+	logging.info("called cron.go(dummy)")
+
+
+	
+	logging.info('leaving testcron()')
+	#return shortcuts.render_to_response('test.html', {'testdata': 'foo'})
+	return shortcuts.render_to_response(
+	'testcron.html', {'testcrondata': 'foo unkn cron'}
+	)
+
+
+
+
 
 

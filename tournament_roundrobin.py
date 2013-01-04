@@ -12,7 +12,7 @@ import clot
 
 
 
-def createGames_RoundRobin():
+def createGames_RoundRobin(tourney_id):
 	"""This is called periodically to check for new games that need to be created.
 	the roundrobin part is that we want everyone to play everyone else.
 	so the players not currently in games are just paired up with each other,
@@ -21,20 +21,20 @@ def createGames_RoundRobin():
 	logging.info('')
 	logging.info('in createGames_RoundRobin()')
 
-	if main.hasTourneyFinished():
+	if main.hasTourneyFinished(tourney_id):
 		logging.info('round robin tourney has finished')
 		return
 
 	#Retrieve all games that are ongoing
-	activeGames = list(games.Game.all().filter("winner =", None))
+	activeGames = list(games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id))
 	activeGameIDs = dict([[g.key().id(), g] for g in activeGames])
 	logging.info("Active games: " + str(activeGameIDs))
 
 	#Throw all of the player IDs that are in these ongoing games into a dictionary
-	playerIDsInGames = dict([[gp.playerID, gp] for gp in games.GamePlayer.all() if gp.gameID in activeGameIDs])
+	playerIDsInGames = dict([[gp.playerID, gp] for gp in games.GamePlayer.all().filter("tourney_id =", tourney_id) if gp.gameID in activeGameIDs])
 
 	#Find all players who aren't in the dictionary (and therefore aren't in any games) and also have not left the CLOT (isParticipating is true)
-	allPlayers = players.Player.all()
+	allPlayers = players.Player.all().filter("tourney_id =", tourney_id)
 	
 	all_players_vec = [p for p in allPlayers]
 	logging.info("all_players_vec: ")
@@ -52,7 +52,7 @@ def createGames_RoundRobin():
 	#now pair up players who are not in games.  IF they have not played each otehr yet.
 
 	#get the head-to-head matrix, so we can see who has played who
-	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable()
+	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable(tourney_id)
 	##logging.info('head_to_head_2d:')
 	##logging.info(head_to_head_2d)
 
@@ -106,17 +106,17 @@ def createGames_RoundRobin():
 	##end of debug
 
 	#The template ID defines the settings used when the game is created.  You can create your own template on warlight.net and enter its ID here
-	templateID = main.getTemplateID()
+	templateID = main.getTemplateID(tourney_id)
 
 	#Create a game for everyone not in a game.
-	gamesCreated = [games.createGame(pair, templateID) for pair in clot.pairs(list_for_pairing)]
+	gamesCreated = [games.createGame(pair, templateID, tourney_id) for pair in clot.pairs(list_for_pairing)]
 	logging.info("Created games " + str(gamesCreated))
 	
 	if (len(activeGames)==0) and (len(list_for_pairing)==0):
-		if main.isTourneyInPlay():
+		if main.isTourneyInPlay(tourney_id):
 			#tourney is in play, but no games are going on, and we found no games we could create.
 			#so the tourney is over
-			main.endTourney()
+			main.endTourney(tourney_id)
 			logging.info('')
 			logging.info('all games have been played, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')

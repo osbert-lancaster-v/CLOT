@@ -1,16 +1,26 @@
 {%extends "base.html"%}
 {%block body%}
 
-<h1>First-time setup</h1>
+<h1>Create a new tournament</h1>
 
-Welcome to CLOT!  This setup should only be completed by the site administrator.  Make sure to complete this before revealing the URL of your website to the public.
+Welcome to CLOT!  This setup can only be completed by a site administrator (who knows the site password). 
 <br />
 
 <ul>
-    <li>Below, you will give your CLOT a name.  This will be displayed at the top of your website.</li>
-    <li>You must be a WarLight member to set up a CLOT site.  The form below asks for your WarLight e-mail address and API Token.  You can get your API token by visiting <a href="http://warlight.net/API/GetAPIToken">http://warlight.net/API/GetAPIToken</a>.  If this link says "No auth found", you must first sign into your WarLight.net account.
-    <br />Your e-mail address and API Token are never revealed to visitors of this website.  However, they are stored in your database, so you should take care not to give database access to anyone.  If you ever suspect someone else has learned your API Token, you should change your WarLight account password immediately as this re-randomizes your API Token.</li>
-    <li>Below, you can choose whether you want to allow non-members to join your CLOT.  If you allow non-members in, you will not be able to use any member-specific features, such as custom scenarios or adjusting the luck percentage.</li>
+    <li>Below, you will give your Tourney a name.  </li>
+    <li>You must be a WarLight member to set up a CLOT site.  The form below asks for your WarLight e-mail address and API Token.  
+    You can get your API token by visiting <a href="http://warlight.net/API/GetAPIToken">http://warlight.net/API/GetAPIToken</a>.  
+    If this link says "No auth found", you must first sign into your WarLight.net account.
+    <br />Your e-mail address and API Token are never revealed to visitors of this website.  
+    However, they are stored in your database, so you should take care not to give database access to anyone.  
+    If you ever suspect someone else has learned your API Token, you should change your WarLight account password immediately as this re-randomizes your API Token.</li>
+    <li>You need to enter the site password - if you are an administrator, then you will know this (it is in the file site_password.py).</li>  
+    <li>You can choose whether you want to allow non-members to join your Tourney.  
+    If you allow non-members in, you will not be able to use any member-specific features, 
+    such as custom scenarios or adjusting the luck percentage.</li>    
+    <li>You can also decide if you want to password-protect your tourney.  
+    If you do, you check that tickbox and also choose a password.  
+    Give the passord to the people you want to join, as they (and you) will then need it to join the tourney.  </li>
 </ul>
 
 <form action="{%url main.setup%}" method="post">

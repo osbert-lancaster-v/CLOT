@@ -1,0 +1,68 @@
+{%extends "base.html"%}
+{%block body%}
+
+<h2>This is for admin/debugging only.  NOT for users.</h2>
+
+<h2>Tourneys</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <td> name  </td>
+            <td> tourney_type  </td>
+
+            <td> adminEmail  </td>
+            <td> adminApiToken  </td>
+            <td> membersOnly  </td>
+
+            <td> templateID  </td>
+
+            <td> numRounds  </td>
+            <td> minimumNumberOfPlayers  </td>
+
+            <td> maximumNumberOfPlayers  </td>
+            <td> startDate  </td>
+            <td> howLongYouHaveToJoinGames </td>
+
+            <td> playersAreGated  </td>
+            <td> roundNumber  </td>
+
+            <td> tourneyInPlay </td>
+            <td> tourneyFinished </td>
+
+            <td> tourney_id  </td>
+            <td> tourney_urlpath </td>
+        </tr>
+    </thead>
+    {%for tourney in tourney_list%}
+    <tr>
+        <td> <a href={{tourney.tourney_urlpath}}> {{tourney.name}} </td>
+            <td> {{tourney.tourney_type }} </td>
+
+            <td> {{tourney.adminEmail }} </td>
+            <td> {{tourney.adminApiToken }} </td>
+            <td> {{tourney.membersOnly }} </td>
+
+            <td> {{tourney.templateID }} </td>
+
+            <td> {{tourney.numRounds }} </td>
+            <td> {{tourney.minimumNumberOfPlayers }} </td>
+
+            <td> {{tourney.maximumNumberOfPlayers }} </td>
+            <td> {{tourney.startDate }} </td>
+            <td> {{tourney.howLongYouHaveToJoinGames}} </td>
+
+            <td> {{tourney.playersAreGated }} </td>
+            <td> {{tourney.roundNumber }} </td>
+
+            <td> {{tourney.tourneyInPlay}} </td>
+            <td> {{tourney.tourneyFinished}} </td>
+
+            <td> {{tourney.tourney_id }} </td>
+            <td> {{tourney.tourney_urlpath}} </td>
+        
+    </tr>
+    {%endfor%}
+</table>
+
+
+{%endblock%}

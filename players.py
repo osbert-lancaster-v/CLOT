@@ -20,16 +20,17 @@ class Player(db.Model):
 	created = db.DateTimeProperty(auto_now_add=True)
 	modified = db.DateTimeProperty(auto_now=True)
 	isMember = db.BooleanProperty()
-	numWins = db.IntegerProperty(default=0) #added by unkn
-	player_id = db.StringProperty(default='not yet known') #added by unkn
+	numWins = db.IntegerProperty(default=0) 
+	player_id = db.StringProperty(default='not yet known') 
+	tourney_id = db.IntegerProperty(default=-1) 
 
 	def __repr__(self):
 		return str(self.key().id()) + " " + self.name
 	def __unicode__(self):
 		return self.name
 
-def numPlayersParticipating():
-	players_participating = [p for p in Player.all() if p.isParticipating]
+def numPlayersParticipating(tourney_id):
+	players_participating = [p for p in Player.all().filter("tourney_id =", tourney_id) if p.isParticipating]
 	return len(players_participating)
 
 class EditPlayerForm(djangoforms.ModelForm):

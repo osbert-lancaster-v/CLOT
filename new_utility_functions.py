@@ -18,42 +18,42 @@ import players
 
 ###########################################
 
-def seeIfTourneyCanStart():
+def seeIfTourneyCanStart(tourney_id):
 	"""this is the default function, if no special one is specified for the tourney type chosen"""
 	
-	ppp = players.Player.all()
+	ppp = players.Player.all().filter("tourney_id =", tourney_id)
 	count = 0
 	for p in ppp:
 		if p.isParticipating:
 			count += 1
 	
-	if count >= main.getMinimumNumberOfPlayers():
-		if (not main.isTourneyInPlay()) and (not main.hasTourneyFinished()):
-			if main.areWePastStarttime():
-				main.startTourney()
+	if count >= main.getMinimumNumberOfPlayers(tourney_id):
+		if (not main.isTourneyInPlay(tourney_id)) and (not main.hasTourneyFinished(tourney_id)):
+			if main.areWePastStarttime(tourney_id):
+				main.startTourney(tourney_id)
 				logging.info('tourney starting')
 				return True
 	else:
-		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers()))
+		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers(tourney_id)))
 		return False
 
 
-def getHeadToHeadTable():
+def getHeadToHeadTable(tourney_id):
 	"""returns a table of the player's head to head results.
 	see end of the function for exactly what is returned"""
 
 	#Load all finished games
-	finishedGames = clot.getFinishedGames()
+	finishedGames = clot.getFinishedGames(tourney_id)
 	logging.info("finishedGames:")
 	logging.info(finishedGames)
 
 	#get player_id : name   dict
-	players_id_name_dict = clot.getPlayersIDNameDict()
+	players_id_name_dict = clot.getPlayersIDNameDict(tourney_id)
 	logging.info('players_id_name_dict')
 	logging.info(players_id_name_dict)
 
 	#get list of players, sorted by currentRank, highest First.
-	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all()]
+	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all().filter("tourney_id =", tourney_id)]
 	players_sorted_by_rank.sort(key=lambda x: x[1])
 	players_ids_sorted_by_rank = [int(p[0]) for p in players_sorted_by_rank]
 	##logging.info('players_ids_sorted_by_rank')

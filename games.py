@@ -29,7 +29,7 @@ class Game(db.Model):
 	legitimateGame = db.BooleanProperty(default=True)
 
 	winningTeamName = db.StringProperty(default='not known as of yet')  #added by unkn 
-
+	tourney_id = db.IntegerProperty(default=-1) 
 
 	def __repr__(self):
 		return str(self.key().id()) + " wlnetGameID=" + str(self.wlnetGameID)
@@ -41,15 +41,16 @@ class GamePlayer(db.Model):
 	gameID = db.IntegerProperty(required=True)
 	playerID = db.IntegerProperty(required=True)
 	state = db.StringProperty()
+	tourney_id = db.IntegerProperty(default=-1) 
 	def __repr__(self):
 		return "gameID=" + str(self.gameID) + ",playerID=" + str(self.playerID) + ",state=" + str(self.state)
 
 
-def createGame(the_players, templateID):
+def createGame(the_players, templateID, tourney_id):
 	"""This calls the WarLight.net API to create a game, and then creates the Game and GamePlayer rows in the local DB"""
 	gameName = ' vs '.join([p.name for p in the_players])[:50]  #game names are limited to %) characters by the api
 
-	config = main.getClotConfig()
+	config = main.getClotConfig(tourney_id)
 	apiRetStr = main.postToApi('/API/CreateGame', json.dumps( { 
 															 'hostEmail': config.adminEmail, 
 															 'hostAPIToken': config.adminApiToken,
@@ -64,12 +65,12 @@ def createGame(the_players, templateID):
 	if gid == -1:
 		raise Exception("CreateGame returned error: " + apiRet.get('error', apiRetStr))
 
-	g = Game(wlnetGameID=gid, name=gameName)
+	g = Game(wlnetGameID=gid, name=gameName, tourney_id=tourney_id)
 	g.save()
 
 	for p in the_players:
-		games.GamePlayer(playerID = p.key().id(), gameID = g.key().id()).save()
-		#teams.append()
+		gameplayer = games.GamePlayer(playerID = p.key().id(), gameID = g.key().id(), tourney_id=tourney_id)
+		gameplayer.save()
 
 	logging.info("Created game " + str(g.key().id()) + " '" + gameName + "'")
 

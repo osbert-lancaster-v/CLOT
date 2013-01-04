@@ -29,5 +29,16 @@ urlpatterns = patterns(
 	(r'^cron$', 'cron.go'),
 	(r'^players_are_gated$','players_are_gated.go'),
 	(r'^cannot_join$','players_are_gated.cannot_join'),
-	###('^admin/', include(admin.site.urls)),
+	(r'^tourneys$', 'home.display_tourneys'),
+
+	(r'^tourneys/(\d+)$', 'home.index_new'),
+	(r'^tourneys/(\d+)/join$', 'join.go'),
+	(r'^tourneys/(\d+)/player/(\d+)$', 'viewplayer.go'),
+	
+	(r'^myadmin_players$', 'admin.myadmin_players'),
+	(r'^myadmin_tourneys$', 'admin.myadmin_tourneys'),
+	
+	(r'^tourneys/(\d+)/testcron$', 'testcron.testcron_one_tourney'),
+	
 	)
+

@@ -17,6 +17,7 @@ from datetime import datetime
 
 import clot
 import new_utility_functions
+import site_password
 
 #also, import the files for your own special tournament types
 import tournament_swiss
@@ -33,136 +34,171 @@ class ClotConfig(db.Model):
 
 	adminEmail = db.StringProperty(required=True, verbose_name="Your WarLight.net e-mail address")
 	adminApiToken = db.StringProperty(required=True, verbose_name="API token (see above for how to get this)")
+	site_password = db.StringProperty(required=True, verbose_name="the site_password")
 	membersOnly = db.BooleanProperty(verbose_name="Only allow WarLight members to join")
-
-	templateID = db.IntegerProperty(default=251301, verbose_name="templateID - default is 1v1 strategic (currently only 1V1 games will work)    [258265 is medium earth 1v1 BUT 75% luck plus other changes]" )
+	requirePasswordToJoin = db.BooleanProperty(verbose_name="Require password to join")
+	tourney_password = db.StringProperty(default = '-----', verbose_name="tourney_password (only if you want password)")
+	
+	templateID = db.IntegerProperty(default=251301, verbose_name="template ID - (only 1v1 games  work atm)  e.g. 258265" )
 
 	numRounds = db.IntegerProperty(default= 3 , verbose_name="number of rounds (needed for swiss tourneys)")
-	minimumNumberOfPlayers = db.IntegerProperty(default= 4 )
+	minimumNumberOfPlayers = db.IntegerProperty(default= 2 )
 	#default_max_num_players = 2**int(numRounds) ##doesn't work.  IntegerProperty -> int complains
 	maximumNumberOfPlayers = db.IntegerProperty(default=8)
 	startDate = db.DateTimeProperty(required=True, default=datetime.now().replace(microsecond=0), verbose_name="Tourney Start Time")
 	howLongYouHaveToJoinGames = db.IntegerProperty(default=15, verbose_name="players must join games within this number of minutes")
 
 	#other variables, but not to be set by the user. 
-	playersAreGated = db.BooleanProperty(default=False, verbose_name="playersAreGated: do NOT select this" )
-	roundNumber = db.IntegerProperty(default=0, verbose_name="roundNumber: do NOT modify this" )
+	playersAreGated = db.BooleanProperty(default=False, verbose_name="do NOT modify this" )
+	roundNumber = db.IntegerProperty(default=0, verbose_name="do NOT modify this" )
 
-	tourneyInPlay = db.BooleanProperty(default=False, verbose_name="tourneyInPlay: do NOT select this")
-	tourneyFinished = db.BooleanProperty(default=False, verbose_name="tourneyFinished: do NOT select this")
+	tourneyInPlay = db.BooleanProperty(default=False, verbose_name="do NOT modify this" )
+	tourneyFinished = db.BooleanProperty(default=False, verbose_name="do NOT modify this" )
+	
+	tourney_id = db.IntegerProperty(default = -1, verbose_name="do NOT modify this" )
+	tourney_urlpath = db.StringProperty(default = 'none', verbose_name="do NOT modify this" )
+	
 
 
-#START OF: horrible hacks :( - basically assumes/requires that we have only one instance of ClotConfig :(
 
-def getTourneyType():
-	for c in ClotConfig.all():
+	def __unicode__(self):
+		return str(self.name) +'    '+ str(self.tourney_type) +'   '+ str(self.tourneyInPlay)
+
+	def __repr__(self):
+		return str(self.name) +'    '+ str(self.tourney_type) +'   '+ str(self.tourneyInPlay)
+
+#---------------------------------------------------------------------
+#functions associated with ClotConfig
+
+def getTourneyType(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.tourney_type
+	assert False #should not have got here
 
-def seeIfTourneyCanStart():
-	tourney_type = getTourneyType()
+def getTourneyName(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
+		return c.name
+	assert False #should not have got here
+
+def getIfRequirePasswordToJoin(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
+		return c.requirePasswordToJoin
+	assert False #should not have got here
+
+def getTourneyPassword(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
+		return c.tourney_password
+	assert False #should not have got here
+
+def seeIfTourneyCanStart(tourney_id):
+	tourney_type = getTourneyType(tourney_id)
 	if tourney_type == 'swiss':
-		return tournament_swiss.seeIfTourneyCanStart_Swiss() #we use the swiss version of this function
+		return tournament_swiss.seeIfTourneyCanStart_Swiss(tourney_id) #we use the swiss version of this function
 	elif tourney_type == 'roundrobin':
-		return new_utility_functions.seeIfTourneyCanStart() #we use the default function
+		return new_utility_functions.seeIfTourneyCanStart(tourney_id) #we use the default function
 	elif tourney_type == 'randommatchup':
-		return new_utility_functions.seeIfTourneyCanStart() #we use the default function
+		return new_utility_functions.seeIfTourneyCanStart(tourney_id) #we use the default function
 	else:
 		assert(False) #no valid fn
 
-def createGames():
-	tourney_type = getTourneyType()
+def createGames(tourney_id):
+	tourney_type = getTourneyType(tourney_id)
 	if tourney_type == 'swiss':
-		return tournament_swiss.createGames_Swiss() #we use the swiss version of this function
+		return tournament_swiss.createGames_Swiss(tourney_id) #we use the swiss version of this function
 	elif tourney_type == 'roundrobin':
-		return tournament_roundrobin.createGames_RoundRobin()
+		return tournament_roundrobin.createGames_RoundRobin(tourney_id)
 	elif tourney_type == 'randommatchup':
-		return tournament_randommatchup.createGames_RandomMatchup()
+		return tournament_randommatchup.createGames_RandomMatchup(tourney_id)
 	else:
 		assert(False) #no valid fn
 
 
-def getHowLongYouHaveToJoinGames():
-	for c in ClotConfig.all():
+def getHowLongYouHaveToJoinGames(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.howLongYouHaveToJoinGames
+	assert False #should not have got here
 
-def getStarttime():
-	for c in ClotConfig.all():
+def getStarttime(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.startDate.replace(microsecond=0)
+	assert False #should not have got here
 
 def getCurrentTime():
 	return datetime.now().replace(microsecond=0)
 
-def areWePastStarttime():
-	for c in ClotConfig.all():
+def areWePastStarttime(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return (c.startDate < datetime.now())
+	assert False #should not have got here
 
-def getMaximumNumberOfPlayers():
-	for c in ClotConfig.all():
+def getMaximumNumberOfPlayers(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.maximumNumberOfPlayers
+	assert False #should not have got here
 
-def arePlayersGated():
-	for c in ClotConfig.all():
+def arePlayersGated(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		if c.playersAreGated:
 			return True
-	return False
+		else:
+			return False
+	assert False #should not have got here
 
-#def gatePlayers():
-	#for c in ClotConfig.all():
-		#c.playersAreGated = True
-		#c.save()
-		#logging.info(c)
-
-#def unGatePlayers():
-	#for c in ClotConfig.all():
-		#c.playersAreGated = False
-		#c.save()
-		#logging.info(c)
-
-def getRoundNumber():
-	for c in ClotConfig.all():
+def getRoundNumber(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.roundNumber
+	assert False #should not have got here
 
-def incrementRoundNumber():
-	for c in ClotConfig.all():
+def incrementRoundNumber(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		c.roundNumber += 1
 		c.save()
 		logging.info(str(c))
+		return
+	assert False #should not have got here
 
-def getNumRounds():
-	for c in ClotConfig.all():
+def getNumRounds(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.numRounds
+	assert False #should not have got here
 
-def getMinimumNumberOfPlayers():
-	for c in ClotConfig.all():
+def getMinimumNumberOfPlayers(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.minimumNumberOfPlayers
+	assert False #should not have got here
 
-def isTourneyInPlay():
-	for c in ClotConfig.all():
+def isTourneyInPlay(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.tourneyInPlay
+	assert False #should not have got here
 
-def hasTourneyFinished():
-	for c in ClotConfig.all():
+def hasTourneyFinished(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.tourneyFinished
+	assert False #should not have got here
 
-def startTourney():
-	for c in ClotConfig.all():
+def startTourney(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		c.tourneyInPlay = True
 		c.playersAreGated = True #hack.  should not really be here. 
 		c.save()
 		logging.info(str(c))
+		return
+	assert False
 
-def endTourney():
-	for c in ClotConfig.all():
+def endTourney(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		c.tourneyInPlay = False
 		c.tourneyFinished = True
 		c.save()
 		logging.info(c)
+		return
+	return False
 
-def getTemplateID():
-	for c in ClotConfig.all():
+def getTemplateID(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 		return c.templateID
-
-#END OF: horrible hacks :( - basically assumes/requires that we have only one instance of ClotConfig :(
+	assert False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -170,9 +206,15 @@ class ClotConfigForm(djangoforms.ModelForm):
 	class Meta:
 		model = ClotConfig
 
-def getClotConfig():
-	for c in ClotConfig.all():
+def getClotConfig(tourney_id):
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
 			return c
+
+def getAnyClotConfig():
+	for c in ClotConfig.all():
+		return c
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def setup(request):
 	"""Called the first time this site is accessed.
@@ -198,20 +240,29 @@ def setup(request):
 			logging.info(tourney_type)
 			logging.info(str(tourney_type))
 			logging.info('not known !!')
-			errors['unknown_tourney_type'] = 'unknown_tourney_type'
+			errors['tourney_type'] = 'unknown_tourney_type'
+		
+		if config.site_password != site_password.getSitePassword():
+			logging.info('site_password incorrect !')
+			errors['site_password'] = 'site_password incorrect'
 
 	if errors:
 		return shortcuts.render_to_response('setup.html', {'form': form})
 
 	config.put()
+	config.tourney_id = config.key().id()
+	logging.info('config.tourney_id = ' + str(config.tourney_id))
+	config.tourney_urlpath = 'tourneys/'+str(config.tourney_id)
+	logging.info('config.tourney_urlpath = ' + config.tourney_urlpath)
+	config.save()
 
-	return http.HttpResponseRedirect('/')
+	return http.HttpResponseRedirect(config.tourney_urlpath)
 
 wlnet = 'warlight.net'
 
 
 def hitapi(api, params):
-	config = getClotConfig()
+	config = getAnyClotConfig()
 	return hitapiwithauth(api, params, config.adminEmail, config.adminApiToken)
 	
 def hitapiwithauth(api, params, email, apitoken):
@@ -248,3 +299,5 @@ def group(collection, keyfunc):
 	for k,g in groupby(data, keyfunc):
 		ret[k] = list(g)
 	return ret
+
+

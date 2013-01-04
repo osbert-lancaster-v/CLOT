@@ -1,96 +1,12 @@
 {%extends "base.html"%}
 {%block body%}
 
-<h1>{{config.name|escape}}</h1>
-
-<h2>{{tourney_type_string}}</h2>
-
-<h2>{{tourney_status_string}}</h2>
-
-<br /><a href="/join">Join</a> | <a href="/leave">Leave</a>
-
-<h2>Players</h2>
-<table border="1">
-    <thead>
-        <tr>
-            <td>Rank</td>
-            <td>Player</td>
-            <td>name</td>
-            <td>player_id</td>           
-            <td>Member</td>
-            <td>number of wins</td>
-            <td>currently participating</td>
-        </tr>
-    </thead>
-    {%for player in players%}
-    <tr>
-        <td>{{player.currentRank}}</td>
-        <td><a href="player/{{player.key.id}}">{{player.name|escape}}</a></td>
-        <td>{{player.name}}</td>
-        <td>{{player.player_id}}</td>
-        <td>{{player.isMember}}</td>
-        <td>{{player.numWins}}</td>   
-        <td>{{player.isParticipating}}</td>
-    </tr>
-    {%endfor%}
-</table>
-
-{% if swiss_games_info_table %}
-<h2>Swiss Rounds</h2>
-<table border="1">
-    {%for round in swiss_games_info_table%}
-        <tr>
-            {%for game in round%}
-                <td>{{game}}</td>
-            {%endfor%}
-        </tr>
-    {%endfor%}
-{% endif %}
-</table>
-
-<h2>HeadToHeadRecord</h2>
-<table border="1">
-    {%for p in biggermat%}
-    <tr>
-        {%for o in p%}
-            <td>{{o}}</td>
-        {%endfor%}
-    </tr>
-    {%endfor%}
-</table>
+<h1 style="color: red"> Welcome to the warlight shadow tourney page </h1>
 
 
-<h2>Games</h2>
-<table border="1">
-    <thead>
-        <tr>
-            <td>Game</td>
-            <td>winner</td>
-            <td>winningTeamName</td>
-            <td>dateCreated</td>
-        </tr>
-    </thead>
-    {%for game in games%}
-    
-    <tr>
-        <td><a href="http://warlight.net/MultiPlayer?GameID={{ game.wlnetGameID}}">{{game.name}}</a></td>
-        <td>{{game.winner}}</td>        
-        <td>{{game.winningTeamName}}</td>
-        <td>{{game.dateCreated}}</td>
-    </tr>
-    {%endfor%}
-</table>
-
-<h3>{{players_gated_string}}</h3>
-<h4>{{minNumPlayersString}}</h4>
-<h4>{{maxNumPlayersString}}</h4>
-<h4>{{starttimeString}}</h4>
-<h4>{{currentTimeString}}</h4>
-<h4>{{how_long_you_have_to_join_games_string}}</h4>
-<td><a href="http://warlight.net/MultiPlayer?TemplateID={{ template_id}}">{{template_title_string}}</a></td>
-
-<h2>{{tourney_status_string}}</h2>
-
+<a href='/tourneys'> view tournaments </a> 
+<br />
+<br /><a href='/setup'> create another tournament (administrators only) </a> 
 
 
 

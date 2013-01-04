@@ -1,0 +1,43 @@
+{%extends "base.html"%}
+{%block body%}
+
+<h2>This is for admin/debugging only.  NOT for users.</h2>
+
+<h2>Players</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <td> name   </td>
+            <td> inviteToken  </td>
+            <td> color   </td>
+            <td> isParticipating  </td>
+            <td> currentRank   </td>
+            <td> created   </td>
+            <td> modified      </td>
+            <td> isMember  </td>
+            <td> numWins   </td>
+            <td> player_id   </td>
+            <td> tourney_id   </td>
+        </tr>
+    </thead>
+    {%for player in the_players_list%}
+    <tr>
+            <td> {{player.name }} </td>
+            <td> {{player.inviteToken}} </td>
+            <td> {{player.color }} </td>
+            <td> {{player.isParticipating}} </td>
+            <td> {{player.currentRank }} </td>
+            <td> {{player.created }} </td>
+            <td> {{player.modified  }} </td>  
+            <td> {{player.isMember}} </td>
+            <td> {{player.numWins }} </td>
+            <td> {{player.player_id }} </td>
+            <td> {{player.tourney_id }} </td>
+    </tr>
+    {%endfor%}
+</table>
+
+
+{%endblock%}
+
+

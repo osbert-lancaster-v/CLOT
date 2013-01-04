@@ -1,0 +1,32 @@
+{%extends "base.html"%}
+{%block body%}
+
+
+<h2 style="color: red">Tourneys</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <td>Tourney</td>
+            <td>Type</td>
+            <td>Start date</td>
+            <td>Members only?</td>
+            <td>Password needed to join?</td>
+            <td>In play?</td>
+            <td>Finished?</td>
+        </tr>
+    </thead>
+    {%for tourney in tourney_list%}
+    <tr>
+        <td> <a href={{tourney.tourney_urlpath}}> {{tourney.name}} </td>
+        <td> {{tourney.tourney_type}} </td>
+        <td> {{tourney.startDate}} </td>
+        <td> {{tourney.membersOnly}} </td>
+        <td> {{tourney.requirePasswordToJoin}} </td>
+        <td> {{tourney.tourneyInPlay}} </td>
+        <td> {{tourney.tourneyFinished}} </td>
+    </tr>
+    {%endfor%}
+</table>
+
+
+{%endblock%}

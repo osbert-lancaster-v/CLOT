@@ -10,21 +10,21 @@ import clot
 
 
 
-def createGames_RandomMatchup():
+def createGames_RandomMatchup(tourney_id):
 	"""This is called periodically to check for new games that need to be created.  
 	You should replace this with your own logic for how games are to be created.
 	Right now, this function just randomly pairs up players who aren't in a game."""
 
 	#Retrieve all games that are ongoing
-	activeGames = list(games.Game.all().filter("winner =", None))
+	activeGames = list(games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id))
 	activeGameIDs = dict([[g.key().id(), g] for g in activeGames])
 	logging.info("Active games: " + str(activeGameIDs))
 
 	#Throw all of the player IDs that are in these ongoing games into a dictionary
-	playerIDsInGames = dict([[gp.playerID, gp] for gp in games.GamePlayer.all() if gp.gameID in activeGameIDs])
+	playerIDsInGames = dict([[gp.playerID, gp] for gp in games.GamePlayer.all().filter("tourney_id =", tourney_id) if gp.gameID in activeGameIDs])
 
 	#Find all players who aren't in the dictionary (and therefore aren't in any games) and also have not left the CLOT (isParticipating is true)
-	allPlayers = players.Player.all()
+	allPlayers = players.Player.all().filter("tourney_id =", tourney_id)
 	
 	all_players_vec = [p for p in allPlayers]
 	logging.info("all_players_vec: ")
@@ -55,10 +55,10 @@ def createGames_RandomMatchup():
 	#end of debug
 
 	#The template ID defines the settings used when the game is created.  You can create your own template on warlight.net and enter its ID here
-	templateID = main.getTemplateID()
+	templateID = main.getTemplateID(tourney_id)
 
 	#Create a game for everyone not in a game.
-	gamesCreated = [games.createGame(pair, templateID) for pair in clot.pairs(playersNotInGames)]
+	gamesCreated = [games.createGame(pair, templateID, tourney_id) for pair in clot.pairs(playersNotInGames)]
 	logging.info("Created games " + str(gamesCreated))
 	
 	#note that for randommatchup, we never end the tournmey (unlike for eg swiss and for roundrobin). 

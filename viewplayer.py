@@ -12,13 +12,17 @@ from django import shortcuts
 
 import players
 import games
+import main
 
 
-def go(request, playerID):
+def go(request, tourney_id, playerID):
 	playerID = int(playerID)
 	p = players.Player.get_by_id(playerID)
-	gameIDs = set([g.gameID for g in games.GamePlayer.all().filter('playerID =', playerID)])
+	gameIDs = set([g.gameID for g in games.GamePlayer.all().filter("tourney_id =", int(tourney_id)).filter('playerID =', playerID)])
 	the_games = [g for g in games.Game.all() if g.key().id() in gameIDs]
 
 
-	return shortcuts.render_to_response('viewplayer.html', {'player': p, 'games': the_games})
+	return shortcuts.render_to_response('viewplayer.html', {'player': p, 'games': the_games, 'tourney_id': tourney_id, 
+	'tourney_name': main.getTourneyName(int(tourney_id)),
+	'tourney_path': '/tourneys/' + str(tourney_id)
+	})

@@ -20,30 +20,39 @@ import players
 #this function is called at set time intervals by the appengine
 def go(request):
 	logging.info("Starting cron...")
-	checkInProgressGames()
-	setResultsOfAllFinishedGames()
-
-	#clot.createGames()
-	#clot.createGames_RandomMatchup()
-
-	if (not main.isTourneyInPlay()) and main.seeIfTourneyCanStart():
-		main.startTourney()
-		logging.info('******STARTED TOURNEY*****')
-		logging.info(main.getTourneyType())
-		logging.info('main.isTourneyInPlay() ' +str(main.isTourneyInPlay()))
-	if main.isTourneyInPlay():
-		main.createGames()
-
-	clot.setRanks()
+	
+	for tourney in main.ClotConfig.all():
+		cron_one_tourney(tourney.tourney_id)
+	
 	logging.info("Cron done")
 	return shortcuts.render_to_response('cron.html')
 
-def checkInProgressGames():
+
+def cron_one_tourney(tourney_id):
+	tourney_id = int(tourney_id)
+	logging.info( 'in cron_one_tourney(' +str(tourney_id)+' )' )
+	
+	checkInProgressGames(tourney_id)
+	setResultsOfAllFinishedGames(tourney_id)
+
+	if (not main.isTourneyInPlay(tourney_id)) and main.seeIfTourneyCanStart(tourney_id):
+		main.startTourney(tourney_id)
+		logging.info('******STARTED TOURNEY ' +str(tourney_id)+ '*****')
+		logging.info(main.getTourneyType(tourney_id))
+		logging.info('main.isTourneyInPlay() ' +str(main.isTourneyInPlay(tourney_id)))
+	if main.isTourneyInPlay(tourney_id):
+		main.createGames(tourney_id)
+
+	clot.setRanks(tourney_id)
+	logging.info( 'cron_one_tourney(' +str(tourney_id)+' ) done' )
+
+
+def checkInProgressGames(tourney_id):
 	"""This is called periodically to look for games that are finished.  If we find
 	a finished game, we record the winner"""
 
 	#Find all games that we think aren't finished
-	activeGames = games.Game.all().filter("winner =", None)
+	activeGames = games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id)
 
 	for g in activeGames:
 		#call WarLight's GameFeed API so that it can tell us if it's finished or not
@@ -69,16 +78,16 @@ def checkInProgressGames():
 			
 			#terminate games that have not started for a long time. 
 			if state == 'WaitingForPlayers':
-				latest_joining_time = g.dateCreated +datetime.timedelta(0,60*main.getHowLongYouHaveToJoinGames()) 
+				latest_joining_time = g.dateCreated +datetime.timedelta(0,60*main.getHowLongYouHaveToJoinGames(tourney_id)) 
 				if datetime.datetime.now() > latest_joining_time:
 					logging.info('game ' + str(g.wlnetGameID) + ' has taken too long to start')
 					#game has taken too long to start.
 					
 					game_id = g.key().id()
 					logging.info('game_id='+str(game_id))
-					for gp in games.GamePlayer.all():
+					for gp in games.GamePlayer.all().filter("tourney_id =", tourney_id):
 						logging.info(gp)
-					game_players = games.GamePlayer.all().filter("gameID =", game_id)
+					game_players = games.GamePlayer.all().filter("gameID =", game_id).filter("tourney_id =", tourney_id)
 					players_ids = [p.playerID for p in game_players]
 					logging.info(players_ids)
 					random.shuffle(players_ids)
@@ -93,38 +102,38 @@ def checkInProgressGames():
 
 
 #must have called checkInProgressGames() recently !!!!!!
-def setResultsOfAllFinishedGames():
+def setResultsOfAllFinishedGames(tourney_id):
 	logging.info('')
-	logging.info('in setResultsOfAllFinishedGames()')
+	logging.info('in setResultsOfAllFinishedGames(tourney_id)')
 	
-	the_players = players.Player.all()
+	the_players = players.Player.all().filter("tourney_id =", tourney_id)
 	playersDict = dict([(p.key().id(),p) for p in the_players])
 	
-	finished_games = games.Game.all().filter("winner !=", None)
+	finished_games = games.Game.all().filter("winner !=", None).filter("tourney_id =", tourney_id)
 	for game in finished_games:
 		logging.info('finished game: '+str(game))
 		game.winningTeamName = str(playersDict[game.winner])
 		logging.info('game.winningTeamName = '+str(game.winningTeamName))
 		game.save()
 
-	finished_games = games.Game.all().filter("winner !=", None)
+	finished_games = games.Game.all().filter("winner !=", None).filter("tourney_id =", tourney_id)
 	for game in finished_games:
 		logging.info('REPEAT game.winningTeamName = '+str(game.winningTeamName))
 
 	logging.info('leaving setResultsOfAllFinishedGames()')
 	logging.info('')
 
-def findWinner(data):
+def findWinner(data,tourney_id):
 	"""Simple helper function to return the Player who won the game.  This takes json data returned by the GameFeed 
 	API.  We just look for a player with the "won" state and then retrieve their Player instance from the database"""
 	winnerInviteToken = filter(lambda p: p['state'] == 'Won', data['players'])[0]["id"]
-	return players.Player.all().filter('inviteToken =', winnerInviteToken)[0]
+	return players.Player.all().filter("tourney_id =", tourney_id).filter('inviteToken =', winnerInviteToken)[0]
 
-def findLoser(data):
+def findLoser(data,tourney_id):
 	"""Simple helper function to return the Player who lost the game.  This takes json data returned by the GameFeed 
 	API.  We just look for a player with the "won" state and then retrieve their Player instance from the database"""
 	loserInviteToken = filter(lambda p: p['state'] != 'Won', data['players'])[0]["id"]
-	return players.Player.all().filter('inviteToken =', loserInviteToken)[0]
+	return players.Player.all().filter("tourney_id =", tourney_id).filter('inviteToken =', loserInviteToken)[0]
 
 
 

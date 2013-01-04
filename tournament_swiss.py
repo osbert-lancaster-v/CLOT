@@ -11,31 +11,31 @@ import games
 import clot
 
 
-def seeIfTourneyCanStart_Swiss():
+def seeIfTourneyCanStart_Swiss(tourney_id):
 	"""this is the special swiss version of the function"""
 	
-	ppp = players.Player.all()
+	ppp = players.Player.all().filter("tourney_id =", tourney_id)
 	count = 0
 	for p in ppp:
 		if p.isParticipating:
 			count += 1
 	
-	if count >= main.getMinimumNumberOfPlayers():
-		if (not main.isTourneyInPlay()) and (not main.hasTourneyFinished()):
-			if main.areWePastStarttime():
-				main.startTourney()
+	if count >= main.getMinimumNumberOfPlayers(tourney_id):
+		if (not main.isTourneyInPlay(tourney_id)) and (not main.hasTourneyFinished(tourney_id)):
+			if main.areWePastStarttime(tourney_id):
+				main.startTourney(tourney_id)
 				logging.info('tourney starting')
 				return True
 	else:
-		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers()))
+		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers(tourney_id)))
 		return False
 
 
-def getMatchedList_Swiss():
+def getMatchedList_Swiss(tourney_id):
 	"""pair up the players according to the swiss tournament matching rules"""
 
 	#head_to_head_biggermat
-	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable()
+	head_to_head_biggermat, head_to_head_2d = new_utility_functions.getHeadToHeadTable(tourney_id)
 
 	num_players = len(head_to_head_biggermat)-1
 	assert(num_players>=2)
@@ -113,25 +113,25 @@ def getMatchedList_Swiss():
 	return new_match_list
 
 
-def getTourneyRoundsAndGameInfo():
+def getTourneyRoundsAndGameInfo(tourney_id):
 	"""this function returns a table of strings, 
 	for display on the /home  html page.  the information is specific to swiss tournaments.
 	the information is just a list of the game in each round, showing who won and who lost"""
 	
 	#Load all finished games
-	finished_games = clot.getFinishedGames()
+	finished_games = clot.getFinishedGames(tourney_id)
 	finished_games_sorted_by_creation_date = [game for game in finished_games]
 	finished_games_sorted_by_creation_date.sort(key=lambda x: x.dateCreated)
 	logging.info("finished_games_sorted_by_creation_date:")
 	logging.info(finished_games_sorted_by_creation_date)
 
 	#get player_id : name   dict
-	players_id_name_dict = clot.getPlayersIDNameDict()
+	players_id_name_dict = clot.getPlayersIDNameDict(tourney_id)
 	logging.info('players_id_name_dict')
 	logging.info(players_id_name_dict)
 
 	#get list of players, sorted by currentRank, highest First.
-	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all()]
+	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all().filter("tourney_id =", tourney_id)]
 	players_sorted_by_rank.sort(key=lambda x: x[1])
 	players_ids_sorted_by_rank = [int(p[0]) for p in players_sorted_by_rank]
 	##logging.info('players_ids_sorted_by_rank')
@@ -189,7 +189,7 @@ def getTourneyRoundsAndGameInfo():
 	return games_string_table_transposed
 
 
-def createGames_Swiss():
+def createGames_Swiss(tourney_id):
 	"""This is called periodically to check if a round has finished.  If so, new games are created.
 	the 'swiss' part is that we match players based on ranking - we match players with similar 
 	rankings who have not yet played each other.  if there are an odd number of players, 
@@ -198,12 +198,12 @@ def createGames_Swiss():
 	logging.info('')
 	logging.info('in createGames_Swiss()')
 
-	if main.hasTourneyFinished():
+	if main.hasTourneyFinished(tourney_id):
 		logging.info('swiss tourney has finished')
 		return
 
 	#Retrieve all games that are ongoing
-	activeGames = list(games.Game.all().filter("winner =", None))
+	activeGames = list(games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id))
 	activeGameIDs = dict([[g.key().id(), g] for g in activeGames])
 	logging.info("Active games: " + str(activeGameIDs))
 
@@ -212,37 +212,37 @@ def createGames_Swiss():
 	else:
 		logging.info('no games in progress.  so we move on to the next round.')
 		
-		if main.getRoundNumber() == main.getNumRounds():
+		if main.getRoundNumber(tourney_id) == main.getNumRounds(tourney_id):
 			main.endTourney()
 			logging.info('')
 			logging.info('all rounds have been played, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')
 			return
 
-		players_ids_matched_list = getMatchedList_Swiss()
+		players_ids_matched_list = getMatchedList_Swiss(tourney_id)
 
 		if not players_ids_matched_list:
-			main.endTourney()
+			main.endTourney(tourney_id)
 			logging.info('')
 			logging.info('seems everyone has played everyone else, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')
 			return
 
-		players_ids_names_dict = dict([[gp.player_id, gp] for gp in players.Player.all()])
+		players_ids_names_dict = dict([[gp.player_id, gp] for gp in players.Player.all().filter("tourney_id =", tourney_id)])
 		logging.info('players_ids_names_dict')
 		logging.info(players_ids_names_dict)
 
 		players_names_matched_list = [players_ids_names_dict[i] for i in players_ids_matched_list]
 
 		#The template ID defines the settings used when the game is created.  You can create your own template on warlight.net and enter its ID here
-		templateID = main.getTemplateID()
+		templateID = main.getTemplateID(tourney_id)
 
 		#Create a game for everyone not in a game.
-		gamesCreated = [games.createGame(pair, templateID) for pair in clot.pairs(players_names_matched_list)]
+		gamesCreated = [games.createGame(pair, templateID, tourney_id) for pair in clot.pairs(players_names_matched_list)]
 		logging.info("Created games " + str(gamesCreated))
 		
-		main.incrementRoundNumber()
-		logging.info("\n ------------------------------------ \n swiss tourney round " + str(main.getRoundNumber())+ " starting.  \n ---------------------------")
+		main.incrementRoundNumber(tourney_id)
+		logging.info("\n ------------------------------------ \n swiss tourney round " + str(main.getRoundNumber(tourney_id))+ " starting.  \n ---------------------------")
 	logging.info('')
 
 
