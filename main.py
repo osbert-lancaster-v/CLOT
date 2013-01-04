@@ -24,6 +24,9 @@ import tournament_swiss
 import tournament_roundrobin
 import tournament_randommatchup
 
+def getCleanedTimeNow():
+	return datetime.now().replace(microsecond=0)
+
 
 #this is the main class for a tournament.
 #it holds the tourney type, max number of players, etc.
@@ -45,7 +48,7 @@ class ClotConfig(db.Model):
 	minimumNumberOfPlayers = db.IntegerProperty(default= 2 )
 	#default_max_num_players = 2**int(numRounds) ##doesn't work.  IntegerProperty -> int complains
 	maximumNumberOfPlayers = db.IntegerProperty(default=8)
-	startDate = db.DateTimeProperty(required=True, default=datetime.now().replace(microsecond=0), verbose_name="Tourney Start Time")
+	startDate = db.DateTimeProperty(required=True, default=getCleanedTimeNow(), verbose_name="Tourney Start Time")
 	howLongYouHaveToJoinGames = db.IntegerProperty(default=15, verbose_name="players must join games within this number of minutes")
 
 	#other variables, but not to be set by the user. 

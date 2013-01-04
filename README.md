@@ -103,3 +103,27 @@ whilst for the google appengine, you go to eg https://appengine.google.com/dashb
 and go to datastore-admin and reset your database objects there.
 
 
+---- known issues ----
+
+in the clotconfig form, the default start time is meant to be the current time.
+BUT this function only gets evaluated once.  
+so later on, your default start time is a long way in the past :(
+the correct methods mentioned on eg stackoverflow website do NOT work for us - differences 
+of 'pure' django vs googleapps django :(
+not a big deal, but annoying.
+
+the swiss tourney for odd number of players (3 players in fact) 
+does NOT show the special swiss list of games correctly - the last round is not shown.
+i think this is not too big a deal as i *think* it ~only happens for 3 players and 3 rounds.
+i will keep an eye on it though.
+
+BIG!!
+no way to decide who won by default in cases where games do not start.  fizzer will 
+be updating the API to allow me to fix this, in his next warlight release.
+currently a winner is nominated at random in these cases. 
+
+
+
+
+
+
