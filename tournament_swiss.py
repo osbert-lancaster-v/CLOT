@@ -144,10 +144,28 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 		player_game_count[player_id] = 0
 
 	#make the games_string_table
-	i_round = 0
+	num_games_per_round = len(players_ids_sorted_by_rank)/2
+	i_round = 1
+	i_game = 0
 	games_string_table = [['round 1']]
 	tmp = []
 	for game in finished_games_sorted_by_creation_date:
+		i_game += 1
+		if i_game > num_games_per_round: 
+			#we have moved on to the next round.  so dump previous round's data into games_string_table.
+			i_round += 1
+			i_game = 1
+			
+			if i_round > 1:
+				games_string_table.append(['round '+str(i_round)])
+
+			tmp.sort()
+			logging.info('tmp:')
+			logging.info(tmp)
+			for g in tmp:
+				games_string_table[i_round-2].append(g[1])
+			tmp = []
+
 		winner_id = game.winner
 		loser_id = game.loser
 		winner_name = players_id_name_dict[winner_id].name
@@ -156,20 +174,7 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 		
 		player_game_count[winner_id] += 1
 		player_game_count[loser_id] += 1
-		if (player_game_count[winner_id]>i_round) or (player_game_count[loser_id]>i_round): #we have moved on to the next round
-			assert abs( player_game_count[winner_id] - player_game_count[loser_id] ) <= 1
-			i_round += 1
-			
-			if i_round > 1:
-				games_string_table.append(['round '+str(i_round)])
 
-				tmp.sort()
-				logging.info('tmp:')
-				logging.info(tmp)
-				for g in tmp:
-					games_string_table[i_round-2].append(g[1])
-				tmp = []
-		
 		best_rank = min(players_ids_sorted_by_rank.index(winner_id) , players_ids_sorted_by_rank.index(loser_id))
 		
 		if tmp==[]:

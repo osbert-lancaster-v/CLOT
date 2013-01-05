@@ -112,10 +112,6 @@ the correct methods mentioned on eg stackoverflow website do NOT work for us - d
 of 'pure' django vs googleapps django :(
 not a big deal, but annoying.
 
-the swiss tourney for odd number of players (3 players in fact) 
-does NOT show the special swiss list of games correctly - the last round is not shown.
-i think this is not too big a deal as i *think* it ~only happens for 3 players and 3 rounds.
-i will keep an eye on it though.
 
 BIG!!
 no way to decide who won by default in cases where games do not start.  fizzer will 
