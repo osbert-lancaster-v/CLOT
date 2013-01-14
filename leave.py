@@ -35,13 +35,13 @@ def go(request):
 
 	#see if we are letting players join or leave
 	tourney_id = int(form.clean_data['tourney_id'])
-	tourney = main.ClotConfig.all().filter('tourney_id =', tourney_id).get()
-	if not tourney:
+	tourney_clotconfig = main.ClotConfig.all().filter('tourney_id =', tourney_id)#.run(batch_size=1000)
+	if not tourney_clotconfig:
 		form.errors['tourney_id'] = 'tourney_id is invalid.'
 		return shortcuts.render_to_response('leave.html', {'form': form})
-	
+
 	players_are_gated_q = False
-	if main.arePlayersGated(tourney_id):
+	if main.arePlayersGated(tourney_id, tourney_clotconfig):
 		players_are_gated_q = True
 		logging.info('players_are_gated_q = '+str(players_are_gated_q))
 		return http.HttpResponseRedirect('/players_are_gated')
@@ -50,7 +50,7 @@ def go(request):
 	inviteToken = form.clean_data['inviteToken']
 
 	#Find the player by their token
-	player = players.Player.all().filter('inviteToken =', inviteToken).filter("tourney_id =", tourney_id).get()
+	player = players.Player.all().filter('inviteToken =', inviteToken).filter("tourney_id =", tourney_id).get() #.run(batch_size=1000)
 	if not player:
 		form.errors['inviteToken'] = 'Invite token is invalid.'
 		return shortcuts.render_to_response('leave.html', {'form': form})

@@ -21,7 +21,6 @@ class Game(db.Model):
 
 	winner = db.IntegerProperty()
 	loser = db.IntegerProperty()
-	#winnerName = db.StringProperty()  #added by unkn 
 	wlnetGameID = db.IntegerProperty(required=True)
 	name = db.StringProperty()
 	dateCreated = db.DateTimeProperty(auto_now_add=True)

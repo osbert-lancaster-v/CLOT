@@ -70,159 +70,169 @@ class ClotConfig(db.Model):
 	def __repr__(self):
 		return str(self.name) +'    '+ str(self.tourney_type) +'   '+ str(self.tourneyInPlay)
 
-#---------------------------------------------------------------------
-#functions associated with ClotConfig
-
-def getTourneyType(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.tourney_type
-	assert False #should not have got here
-
-def getTourneyName(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.name
-	assert False #should not have got here
-
-def doesTourneyExist(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return True
-	return False #seems tourney with this tourney_id does not exist
-
-def getIfRequirePasswordToJoin(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.requirePasswordToJoin
-	assert False #should not have got here
-
-def getTourneyPassword(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.tourney_password
-	assert False #should not have got here
-
-def seeIfTourneyCanStart(tourney_id):
-	tourney_type = getTourneyType(tourney_id)
-	if tourney_type == 'swiss':
-		return tournament_swiss.seeIfTourneyCanStart_Swiss(tourney_id) #we use the swiss version of this function
-	elif tourney_type == 'roundrobin':
-		return new_utility_functions.seeIfTourneyCanStart(tourney_id) #we use the default function
-	elif tourney_type == 'randommatchup':
-		return new_utility_functions.seeIfTourneyCanStart(tourney_id) #we use the default function
-	else:
-		assert(False) #no valid fn
-
-def createGames(tourney_id):
-	tourney_type = getTourneyType(tourney_id)
-	if tourney_type == 'swiss':
-		return tournament_swiss.createGames_Swiss(tourney_id) #we use the swiss version of this function
-	elif tourney_type == 'roundrobin':
-		return tournament_roundrobin.createGames_RoundRobin(tourney_id)
-	elif tourney_type == 'randommatchup':
-		return tournament_randommatchup.createGames_RandomMatchup(tourney_id)
-	else:
-		assert(False) #no valid fn
-
-
-def getHowLongYouHaveToJoinGames(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.howLongYouHaveToJoinGames
-	assert False #should not have got here
-
-def getStarttime(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.startDate.replace(microsecond=0)
-	assert False #should not have got here
-
-def getCurrentTime():
-	return datetime.now().replace(microsecond=0)
-
-def areWePastStarttime(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return (c.startDate < datetime.now())
-	assert False #should not have got here
-
-def getMaximumNumberOfPlayers(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.maximumNumberOfPlayers
-	assert False #should not have got here
-
-def arePlayersGated(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		if c.playersAreGated:
-			return True
-		else:
-			return False
-	assert False #should not have got here
-
-def getRoundNumber(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.roundNumber
-	assert False #should not have got here
-
-def incrementRoundNumber(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		c.roundNumber += 1
-		c.save()
-		logging.info(str(c))
-		return
-	assert False #should not have got here
-
-def getNumRounds(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.numRounds
-	assert False #should not have got here
-
-def getMinimumNumberOfPlayers(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.minimumNumberOfPlayers
-	assert False #should not have got here
-
-def isTourneyInPlay(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.tourneyInPlay
-	assert False #should not have got here
-
-def hasTourneyFinished(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.tourneyFinished
-	assert False #should not have got here
-
-def startTourney(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		c.tourneyInPlay = True
-		c.playersAreGated = True #hack.  should not really be here. 
-		c.save()
-		logging.info(str(c))
-		return
-	assert False
-
-def endTourney(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		c.tourneyInPlay = False
-		c.tourneyFinished = True
-		c.save()
-		logging.info(c)
-		return
-	return False
-
-def getTemplateID(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-		return c.templateID
-	assert False
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ClotConfigForm(djangoforms.ModelForm):
 	class Meta:
 		model = ClotConfig
 
+		exclude = ['playersAreGated', 'roundNumber', 'tourneyInPlay', 'tourneyFinished', 'tourney_id', 'tourney_urlpath']  #do not show these in the form
+
+
+
+#---------------------------------------------------------------------
+#functions associated with ClotConfig
+
 def getClotConfig(tourney_id):
-	for c in ClotConfig.all().filter("tourney_id =", tourney_id):
-			return c
+	for c in ClotConfig.all().filter("tourney_id =", tourney_id): #using get() because there will only be one object
+		return c
 
 def getAnyClotConfig():
 	for c in ClotConfig.all():
 		return c
 
+def getTourneyType(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.tourney_type
+	assert False #should not have got here
+
+def getTourneyName(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.name
+	assert False #should not have got here
+
+def doesTourneyExist(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return True
+	return False #seems tourney with this tourney_id does not exist
+
+def getIsMembersOnly(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.membersOnly
+	assert False #should not have got here
+
+def getIfRequirePasswordToJoin(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.requirePasswordToJoin
+	assert False #should not have got here
+
+def getTourneyPassword(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.tourney_password
+	assert False #should not have got here
+
+def seeIfTourneyCanStart(tourney_id, tourney_clotconfig):
+	tourney_type = getTourneyType(tourney_id, tourney_clotconfig)
+	if tourney_type == 'swiss':
+		return tournament_swiss.seeIfTourneyCanStart_Swiss(tourney_id, tourney_clotconfig) #we use the swiss version of this function
+	elif tourney_type == 'roundrobin':
+		return new_utility_functions.seeIfTourneyCanStart(tourney_id, tourney_clotconfig) #we use the default function
+	elif tourney_type == 'randommatchup':
+		return new_utility_functions.seeIfTourneyCanStart(tourney_id, tourney_clotconfig) #we use the default function
+	else:
+		assert(False) #no valid fn
+
+def createGames(tourney_id, tourney_clotconfig):
+	tourney_type = getTourneyType(tourney_id, tourney_clotconfig)
+	if tourney_type == 'swiss':
+		return tournament_swiss.createGames_Swiss(tourney_id, tourney_clotconfig) #we use the swiss version of this function
+	elif tourney_type == 'roundrobin':
+		return tournament_roundrobin.createGames_RoundRobin(tourney_id, tourney_clotconfig)
+	elif tourney_type == 'randommatchup':
+		return tournament_randommatchup.createGames_RandomMatchup(tourney_id, tourney_clotconfig)
+	else:
+		assert(False) #no valid fn
+
+
+def getHowLongYouHaveToJoinGames(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.howLongYouHaveToJoinGames
+	assert False #should not have got here
+
+def getStarttime(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.startDate.replace(microsecond=0)
+	assert False #should not have got here
+
+def getCurrentTime():
+	return datetime.now().replace(microsecond=0)
+
+def areWePastStarttime(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return (tourney_clotconfig.startDate < datetime.now())
+	assert False #should not have got here
+
+def getMaximumNumberOfPlayers(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.maximumNumberOfPlayers
+	assert False #should not have got here
+
+def arePlayersGated(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		if tourney_clotconfig.playersAreGated:
+			return True
+		else:
+			return False
+	assert False #should not have got here
+
+def getRoundNumber(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.roundNumber
+	assert False #should not have got here
+
+def incrementRoundNumber(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		tourney_clotconfig.roundNumber += 1
+		tourney_clotconfig.save()
+		logging.info(str(tourney_clotconfig))
+		return
+	assert False #should not have got here
+
+def getNumRounds(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.numRounds
+	assert False #should not have got here
+
+def getMinimumNumberOfPlayers(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.minimumNumberOfPlayers
+	assert False #should not have got here
+
+def isTourneyInPlay(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.tourneyInPlay
+	assert False #should not have got here
+
+def hasTourneyFinished(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.tourneyFinished
+	assert False #should not have got here
+
+def startTourney(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		tourney_clotconfig.tourneyInPlay = True
+		tourney_clotconfig.playersAreGated = True
+		tourney_clotconfig.save()
+		logging.info(str(tourney_clotconfig))
+		return
+	assert False
+
+def endTourney(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		tourney_clotconfig.tourneyInPlay = False
+		tourney_clotconfig.tourneyFinished = True
+		tourney_clotconfig.save()
+		logging.info(tourney_clotconfig)
+		return		
+	return False
+
+def getTemplateID(tourney_id, tourney_clotconfig):
+	if tourney_clotconfig != 0:
+		return tourney_clotconfig.templateID
+	assert False
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 def setup(request):
 	"""Called the first time this site is accessed.

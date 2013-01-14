@@ -39,18 +39,18 @@ def go(request):
 
 	#see if we are letting more players join.
 	tourney_id = int(form.clean_data['tourney_id'])
-	tourney = main.ClotConfig.all().filter('tourney_id =', tourney_id).get()
-	if not tourney:
+	tourney_clotconfig = main.getClotConfig(tourney_id)#.run(batch_size=1000)
+	if not tourney_clotconfig:
 		form.errors['tourney_id'] = 'tourney_id is invalid.'
 		return shortcuts.render_to_response('join.html', {'form': form})
 	
 	players_are_gated_q = False
-	if main.arePlayersGated(tourney_id):
+	if main.arePlayersGated(tourney_id, tourney_clotconfig):
 		players_are_gated_q = True
 		logging.info('players_are_gated_q = '+str(players_are_gated_q))
 		return http.HttpResponseRedirect('/players_are_gated')
 
-	if players.numPlayersParticipating(tourney_id) >= main.getMaximumNumberOfPlayers(tourney_id):
+	if players.numPlayersParticipating(tourney_id) >= main.getMaximumNumberOfPlayers(tourney_id, tourney_clotconfig):
 		logging.info('too many players')
 		return http.HttpResponseRedirect('/cannot_join') 
 
@@ -65,8 +65,8 @@ def go(request):
 		return shortcuts.render_to_response('join.html', {'form': form})
 
 	tourney_password = str(form.clean_data['tourney_password'])
-	if main.getIfRequirePasswordToJoin(tourney_id):
-		if tourney_password != main.getTourneyPassword(tourney_id):
+	if main.getIfRequirePasswordToJoin(tourney_id, tourney_clotconfig):
+		if tourney_password != main.getTourneyPassword(tourney_id, tourney_clotconfig):
 			form.errors['tourney_password'] = 'The supplied tourney_password is required but is not correct.  Please type the correct password for this tourney.'
 			return shortcuts.render_to_response('join.html', {'form': form})
 
@@ -90,7 +90,7 @@ def go(request):
 
 	player = players.Player(inviteToken=inviteToken, name=player_name, color=data['color'], isMember=data['isMember'].lower() == 'true') 
 
-	if main.getClotConfig(tourney_id).membersOnly and not player.isMember:
+	if main.getIsMembersOnly(tourney_id, tourney_clotconfig) and not player.isMember:
 		form.errors['inviteToken'] = 'This site only allows members to join.	See the Membership tab on WarLight.net for information about memberships.'
 		return shortcuts.render_to_response('join.html', {'form': form})
 

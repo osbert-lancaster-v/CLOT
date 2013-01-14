@@ -25,37 +25,30 @@ def index(request):    #deprecated
 	return shortcuts.render_to_response('home.html',{'nowt': 'nowt' })
 
 
-
 def index_new(request,tourney_id):
 	"""Request / """
 	logging.info('in index_new(' +str(tourney_id)+ ')')
 
 	tourney_id = int(tourney_id)
 	logging.info('tourney_id = '+str(tourney_id))
+	tourney_clotconfig = main.getClotConfig(tourney_id)
 
-	if not main.doesTourneyExist(tourney_id):
+	if not main.doesTourneyExist(tourney_id, tourney_clotconfig):
 		logging.info('tourney does not exist, redirecting user to tourneys info instead')
 		return shortcuts.render_to_response('tourney_does_not_exist.html' )
 
-	#Gather data used by home.html
-	the_players = players.Player.all().filter("tourney_id =", tourney_id)
-	playersDict = dict([(p.key().id(),p) for p in the_players])
-	logging.info('playersDict')
-	logging.info(playersDict)
-
 	#arrange players by rank
-	the_players = players.Player.all().filter("tourney_id =", tourney_id)
+	the_players = players.Player.all().filter("tourney_id =", tourney_id)#.run(batch_size=1000)
 	the_players = sorted(the_players, key=lambda z: z.currentRank)
 
-	gamePlayers = main.group(games.GamePlayer.all().filter("tourney_id =", tourney_id), lambda z: z.gameID)
+	gamePlayers = main.group(games.GamePlayer.all().filter("tourney_id =", tourney_id), lambda z: z.gameID)  #.run(batch_size=1000)
 
 	#arrange games by reverse of created date
-	the_games = games.Game.all().filter("tourney_id =", tourney_id)
+	the_games = games.Game.all().filter("tourney_id =", tourney_id)#.run(batch_size=1000)
 	the_games = sorted(the_games, key=lambda z: z.dateCreated, reverse=True)
-	
-	for game in the_games:
-		logging.info('game: '+str(game))
-		logging.info('game.winningTeamName = '+str(game.winningTeamName))
+	#for game in the_games:
+	#	logging.info('game: '+str(game))
+	#	logging.info('game.winningTeamName = '+str(game.winningTeamName))
 
 
 	#do the head-to-head table
@@ -70,37 +63,37 @@ def index_new(request,tourney_id):
 
 	#see if players are gated
 	players_gated_string = "players may join or leave"
-	if main.arePlayersGated(tourney_id):
+	if main.arePlayersGated(tourney_id, tourney_clotconfig):
 		players_gated_string = "players may NOT join or leave"
 
 	#get tourney_status_string
 	tourney_status_string = 'Tourney Not Yet Started'
-	if main.isTourneyInPlay(tourney_id):
-		if str(main.getTourneyType(tourney_id)) == 'swiss':
-			tourney_status_string = 'Tourney In Progress.  Round '+str(main.getRoundNumber(tourney_id))+' of '+str(main.getNumRounds(tourney_id))
+	if main.isTourneyInPlay(tourney_id, tourney_clotconfig):
+		if str(main.getTourneyType(tourney_id, tourney_clotconfig)) == 'swiss':
+			tourney_status_string = 'Tourney In Progress.  Round '+str(main.getRoundNumber(tourney_id, tourney_clotconfig))+' of '+str(main.getNumRounds(tourney_id, tourney_clotconfig))
 		else:
 			tourney_status_string = 'Tourney In Progress.'
-	elif main.hasTourneyFinished(tourney_id):
+	elif main.hasTourneyFinished(tourney_id, tourney_clotconfig):
 		winner = the_players[0]
 		winner_name = winner.name
 		tourney_status_string = 'Tourney has finished.  Congratulations to '+str(winner_name)+'!'
 
-	minNumPlayersString= 'minNumPlayers: '+str(main.getMinimumNumberOfPlayers(tourney_id))
-	maxNumPlayersString= 'maxNumPlayers: '+str(main.getMaximumNumberOfPlayers(tourney_id))
-	starttimeString = 'starttime will be:  '+str(main.getStarttime(tourney_id))+'    provided we have minimum number of players.'
+	minNumPlayersString= 'minNumPlayers: '+str(main.getMinimumNumberOfPlayers(tourney_id, tourney_clotconfig))
+	maxNumPlayersString= 'maxNumPlayers: '+str(main.getMaximumNumberOfPlayers(tourney_id, tourney_clotconfig))
+	starttimeString = 'starttime will be:  '+str(main.getStarttime(tourney_id, tourney_clotconfig))+'    provided we have minimum number of players.'
 	currentTimeString = 'current time =     '+str(main.getCurrentTime())
-	tourney_type_string = str(main.getTourneyType(tourney_id)) + ' tourney'
-	how_long_you_have_to_join_games_string = 'You have '+str(main.getHowLongYouHaveToJoinGames(tourney_id))+' minutes to join your auto-created games.  After that you may lose that game!!'
-	template_id = main.getTemplateID(tourney_id)
+	tourney_type_string = str(main.getTourneyType(tourney_id, tourney_clotconfig)) + ' tourney'
+	how_long_you_have_to_join_games_string = 'You have '+str(main.getHowLongYouHaveToJoinGames(tourney_id, tourney_clotconfig))+' minutes to join your auto-created games.  After that you may lose that game!!'
+	template_id = main.getTemplateID(tourney_id, tourney_clotconfig)
 
 	#things for specific tourney types
-	if main.getTourneyType(tourney_id)=='swiss':
+	if main.getTourneyType(tourney_id, tourney_clotconfig)=='swiss':
 		swiss_games_info_table = tournament_swiss.getTourneyRoundsAndGameInfo(tourney_id)
 	else:
 		swiss_games_info_table = 0
 	#end of things for specific tourney types
 
-	return shortcuts.render_to_response('tourney_home.html',{'players': the_players, 'config': main.getClotConfig(tourney_id), 'games': the_games, 
+	return shortcuts.render_to_response('tourney_home.html',{'players': the_players, 'config': tourney_clotconfig, 'games': the_games, 
 			'biggermat':biggermat_str,
 			'players_gated_string':players_gated_string,
 			'minNumPlayersString':minNumPlayersString,

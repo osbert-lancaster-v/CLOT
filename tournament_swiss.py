@@ -11,23 +11,23 @@ import games
 import clot
 
 
-def seeIfTourneyCanStart_Swiss(tourney_id):
+def seeIfTourneyCanStart_Swiss(tourney_id, tourney_clotconfig):
 	"""this is the special swiss version of the function"""
 	
-	ppp = players.Player.all().filter("tourney_id =", tourney_id)
+	ppp = players.Player.all().filter("tourney_id =", tourney_id)#.run(batch_size=1000)
 	count = 0
 	for p in ppp:
 		if p.isParticipating:
 			count += 1
 	
-	if count >= main.getMinimumNumberOfPlayers(tourney_id):
-		if (not main.isTourneyInPlay(tourney_id)) and (not main.hasTourneyFinished(tourney_id)):
-			if main.areWePastStarttime(tourney_id):
-				main.startTourney(tourney_id)
+	if count >= main.getMinimumNumberOfPlayers(tourney_id, tourney_clotconfig):
+		if (not main.isTourneyInPlay(tourney_id, tourney_clotconfig)) and (not main.hasTourneyFinished(tourney_id, tourney_clotconfig)):
+			if main.areWePastStarttime(tourney_id, tourney_clotconfig):
+				main.startTourney(tourney_id, tourney_clotconfig)
 				logging.info('tourney starting')
 				return True
 	else:
-		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers(tourney_id)))
+		logging.info('tourney doesnt yet have enough players to start.  num active players = '+str(count)+' num needed players = '+str(main.getMinimumNumberOfPlayers(tourney_id, tourney_clotconfig)))
 		return False
 
 
@@ -45,8 +45,8 @@ def getMatchedList_Swiss(tourney_id):
 	#randomly shuffled to try and avoid paterns in the matching
 	temp = deepcopy(head_to_head_biggermat[0][1:])
 	playersidlocal_playerids = [temp[i] for i in range(0,num_players)]
-	logging.info('playersidlocal_playerids')
-	logging.info(playersidlocal_playerids)
+	#logging.info('playersidlocal_playerids')
+	#logging.info(playersidlocal_playerids)
 
 	num_wins = []
 	num_games = []
@@ -62,8 +62,8 @@ def getMatchedList_Swiss(tourney_id):
 	if num_players%2 == 1:
 		tmp = zip(num_games,range(0,num_players))
 		tmp.sort()
-		logging.info('tmp')
-		logging.info(tmp)
+		#logging.info('tmp')
+		#logging.info(tmp)
 		player_who_sits_out = tmp[-1][1] #this player is one who has highest number of games
 		logging.info('player_who_sits_out')
 		logging.info(player_who_sits_out)
@@ -79,13 +79,13 @@ def getMatchedList_Swiss(tourney_id):
 					edges.append((i,j,-abs_win_diff+0.1*random.random())) #note the - sign.  the 0.1*random.random() is to randomise things WITHOUT changing the ranking of num wins etc. 
 				else:
 					edges.append((i,j,-1000000)) #a big number, to ensure we never make this match
-	logging.info('edges')
-	logging.info(edges)
+	#logging.info('edges')
+	#logging.info(edges)
 
 	#call the clever matching algorithm
 	matchups = maxWeightMatching(edges,True)
-	logging.info('matchups')
-	logging.info(matchups)
+	#logging.info('matchups')
+	#logging.info(matchups)
 	if not matchups:
 		return [] #we havent got any matchups.  likely that the tournament is over. 
 
@@ -107,8 +107,8 @@ def getMatchedList_Swiss(tourney_id):
 	##if player_who_sits_out >= 0:
 	##	new_match_list.append(str(playersidlocal_playerids[player_who_sits_out])) #he wont get a game though, because of the odd number
 
-	logging.info('new_match_list')
-	logging.info(new_match_list)
+	#logging.info('new_match_list')
+	#logging.info(new_match_list)
 	
 	return new_match_list
 
@@ -122,16 +122,16 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 	finished_games = clot.getFinishedGames(tourney_id)
 	finished_games_sorted_by_creation_date = [game for game in finished_games]
 	finished_games_sorted_by_creation_date.sort(key=lambda x: x.dateCreated)
-	logging.info("finished_games_sorted_by_creation_date:")
-	logging.info(finished_games_sorted_by_creation_date)
+	#logging.info("finished_games_sorted_by_creation_date:")
+	#logging.info(finished_games_sorted_by_creation_date)
 
 	#get player_id : name   dict
 	players_id_name_dict = clot.getPlayersIDNameDict(tourney_id)
-	logging.info('players_id_name_dict')
-	logging.info(players_id_name_dict)
+	#logging.info('players_id_name_dict')
+	#logging.info(players_id_name_dict)
 
 	#get list of players, sorted by currentRank, highest First.
-	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all().filter("tourney_id =", tourney_id)]
+	players_sorted_by_rank = [[p.player_id, p.currentRank] for p in players.Player.all().filter("tourney_id =", tourney_id)]  ###.run(batch_size=1000)]
 	players_sorted_by_rank.sort(key=lambda x: x[1])
 	players_ids_sorted_by_rank = [int(p[0]) for p in players_sorted_by_rank]
 	##logging.info('players_ids_sorted_by_rank')
@@ -160,8 +160,8 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 				games_string_table.append(['round '+str(i_round)])
 
 			tmp.sort()
-			logging.info('tmp:')
-			logging.info(tmp)
+			#logging.info('tmp:')
+			#logging.info(tmp)
 			for g in tmp:
 				games_string_table[i_round-2].append(g[1])
 			tmp = []
@@ -182,19 +182,23 @@ def getTourneyRoundsAndGameInfo(tourney_id):
 		else:
 			tmp.append([best_rank,game_name_str])
 
+	counter = 0
 	tmp.sort()
 	for g in tmp:
+		counter += 1
 		games_string_table[i_round-1].append(g[1])
+	while counter < num_games_per_round:
+		counter += 1
+		games_string_table[i_round-1].append('---')
 
-
-	logging.info('games_string_table:')
-	logging.info(games_string_table)
+	#logging.info('games_string_table:')
+	#logging.info(games_string_table)
 
 	games_string_table_transposed = zip(*games_string_table) #transpose the table
 	return games_string_table_transposed
 
 
-def createGames_Swiss(tourney_id):
+def createGames_Swiss(tourney_id, tourney_clotconfig):
 	"""This is called periodically to check if a round has finished.  If so, new games are created.
 	the 'swiss' part is that we match players based on ranking - we match players with similar 
 	rankings who have not yet played each other.  if there are an odd number of players, 
@@ -203,12 +207,12 @@ def createGames_Swiss(tourney_id):
 	logging.info('')
 	logging.info('in createGames_Swiss()')
 
-	if main.hasTourneyFinished(tourney_id):
+	if main.hasTourneyFinished(tourney_id, tourney_clotconfig):
 		logging.info('swiss tourney has finished')
 		return
 
 	#Retrieve all games that are ongoing
-	activeGames = list(games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id))
+	activeGames = list(games.Game.all().filter("winner =", None).filter("tourney_id =", tourney_id)) ###.run(batch_size=1000))
 	activeGameIDs = dict([[g.key().id(), g] for g in activeGames])
 	logging.info("Active games: " + str(activeGameIDs))
 
@@ -217,8 +221,8 @@ def createGames_Swiss(tourney_id):
 	else:
 		logging.info('no games in progress.  so we move on to the next round.')
 		
-		if main.getRoundNumber(tourney_id) == main.getNumRounds(tourney_id):
-			main.endTourney(tourney_id)
+		if main.getRoundNumber(tourney_id, tourney_clotconfig) == main.getNumRounds(tourney_id, tourney_clotconfig):
+			main.endTourney(tourney_id, tourney_clotconfig)
 			logging.info('')
 			logging.info('all rounds have been played, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')
@@ -227,27 +231,27 @@ def createGames_Swiss(tourney_id):
 		players_ids_matched_list = getMatchedList_Swiss(tourney_id)
 
 		if not players_ids_matched_list:
-			main.endTourney(tourney_id)
+			main.endTourney(tourney_id, tourney_clotconfig)
 			logging.info('')
 			logging.info('seems everyone has played everyone else, so TOURNAMENT IS OVER !!!!!!!!!!!!!!')
 			logging.info('')
 			return
 
-		players_ids_names_dict = dict([[gp.player_id, gp] for gp in players.Player.all().filter("tourney_id =", tourney_id)])
+		players_ids_names_dict = dict([[gp.player_id, gp] for gp in players.Player.all().filter("tourney_id =", tourney_id)]) ###.run(batch_size=1000)])
 		logging.info('players_ids_names_dict')
 		logging.info(players_ids_names_dict)
 
 		players_names_matched_list = [players_ids_names_dict[i] for i in players_ids_matched_list]
 
 		#The template ID defines the settings used when the game is created.  You can create your own template on warlight.net and enter its ID here
-		templateID = main.getTemplateID(tourney_id)
+		templateID = main.getTemplateID(tourney_id, tourney_clotconfig)
 
 		#Create a game for everyone not in a game.
 		gamesCreated = [games.createGame(pair, templateID, tourney_id) for pair in clot.pairs(players_names_matched_list)]
 		logging.info("Created games " + str(gamesCreated))
 		
-		main.incrementRoundNumber(tourney_id)
-		logging.info("\n ------------------------------------ \n swiss tourney round " + str(main.getRoundNumber(tourney_id))+ " starting.  \n ---------------------------")
+		main.incrementRoundNumber(tourney_id, tourney_clotconfig)
+		logging.info("\n ------------------------------------ \n swiss tourney round " + str(main.getRoundNumber(tourney_id, tourney_clotconfig))+ " starting.  \n ---------------------------")
 	logging.info('')
 
 

@@ -113,10 +113,15 @@ of 'pure' django vs googleapps django :(
 not a big deal, but annoying.
 
 
-BIG!!
-no way to decide who won by default in cases where games do not start.  fizzer will 
-be updating the API to allow me to fix this, in his next warlight release.
-currently a winner is nominated at random in these cases. 
+in a 10-player tourney, i hit the google apps limit for "Datastore Read Operations"
+limit is 50,000 read operations - how could i hit it??
+BUT we are 'charged' for each object downloaded.
+i have tried to limit the number of times i call eg Games.all() 
+and have gone always for Game.all().filter(-some filter-) to try to reduce read operations.
+situation is still bad though - reloading the tourney_home with 10 players uses 0.4% of my quota :/
+BEST fix would be to cache the data in the tourney_home page - would this make it only one read operation for each page reload???
+BUT i do not want to warp my code any more, in order to fit in with this really annoying limit.  (if you pay, you get unlimited data reads :/ )
+
 
 
 

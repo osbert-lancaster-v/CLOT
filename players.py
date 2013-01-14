@@ -30,7 +30,7 @@ class Player(db.Model):
 		return self.name
 
 def numPlayersParticipating(tourney_id):
-	players_participating = [p for p in Player.all().filter("tourney_id =", tourney_id) if p.isParticipating]
+	players_participating = [p for p in Player.all().filter("tourney_id =", tourney_id) if p.isParticipating]   ###.run(batch_size=1000)
 	return len(players_participating)
 
 class EditPlayerForm(djangoforms.ModelForm):
